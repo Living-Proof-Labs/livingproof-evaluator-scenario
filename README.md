@@ -1,8 +1,8 @@
-# livingproof-evaluator-bdd
+# livingproof-evaluator-scenario
 
-Deterministic BDD evaluator for Living Proof Labs robot capability specifications.
+Deterministic scenario evaluator for Living Proof Labs robot capability specifications.
 
-This repository will hold a generic Gherkin step vocabulary over observables and world places, and a runner that reads MCAP through an observation binding. Spec authors write no code. Example steps include:
+This repository will hold a generic Gherkin step vocabulary over observables and world places, and a runner that reads MCAP through an observation binding. Spec authors write no code. Scenarios are written in Gherkin. Example steps include:
 
 - the base enters place X within N seconds
 - the base lateral offset from the centerline stays within N meters
