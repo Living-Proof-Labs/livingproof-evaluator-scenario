@@ -1,0 +1,100 @@
+# SPDX-License-Identifier: Apache-2.0
+# This repository has no published development image. Until one exists, these
+# jobs are the documented fallback: GitHub-hosted ubuntu-24.04 and
+# ubuntu-24.04-arm, the pinned uv setup action, and Task 3.54.0, running the
+# same `task setup` and `task verify` commands as a local checkout. Publishing
+# the image needs owner approval and a registry permission this repository
+# does not add, so this change does not open a tracking issue.
+name: Verify
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    permissions:
+      contents: read
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+            actionlint_archive: actionlint_1.7.12_linux_amd64.tar.gz
+            actionlint_sha256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+            actionlint_archive: actionlint_1.7.12_linux_arm64.tar.gz
+            actionlint_sha256: 325e971b6ba9bfa504672e29be93c24981eeb1c07576d730e9f7c8805afff0c6
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          # Full history and tags, so hatch-vcs can read the release tag.
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          python-version: "3.12"
+      - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
+        with:
+          version: "3.54.0"
+      - run: task setup
+      - run: task verify
+      - name: Publish test results
+        id: report
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        with:
+          name: Scenario evaluator tests (${{ matrix.architecture }})
+          path: artifacts/tests.xml
+          reporter: java-junit
+          fail-on-error: true
+          fail-on-empty: true
+      - name: Retain the JUnit report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: junit-report-${{ matrix.architecture }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/tests.xml
+          retention-days: 30
+          if-no-files-found: error
+      - name: Summarize test results
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "### Scenario evaluator tests (${{ matrix.architecture }})"
+            echo "Passed: ${{ steps.report.outputs.passed }}"
+            echo "Failed: ${{ steps.report.outputs.failed }}"
+            echo "Skipped: ${{ steps.report.outputs.skipped }}"
+            echo "Check: ${{ steps.report.outputs.url }}"
+            echo "Raw JUnit report retained for 30 days as artifact junit-report-${{ matrix.architecture }}-${{ github.event.pull_request.head.sha || github.sha }}."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: actionlint
+        if: ${{ !cancelled() }}
+        env:
+          ACTIONLINT_ARCHIVE: ${{ matrix.actionlint_archive }}
+          ACTIONLINT_SHA256: ${{ matrix.actionlint_sha256 }}
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/$ACTIONLINT_ARCHIVE" \
+            "https://github.com/rhysd/actionlint/releases/download/v1.7.12/$ACTIONLINT_ARCHIVE"
+          echo "$ACTIONLINT_SHA256  $RUNNER_TEMP/$ACTIONLINT_ARCHIVE" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$ACTIONLINT_ARCHIVE" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color
+  release:
+    # semantic-release.yml@v3.0.0 analyzes conventional commits, then tags
+    # v${version} and publishes a GitHub release. It does not write a version
+    # into pyproject.toml. hatch-vcs reads that v* tag when the package is built.
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v3.0.0
