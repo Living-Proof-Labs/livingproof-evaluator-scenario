@@ -9,8 +9,8 @@ from livingproof_evaluator_scenario.checks import INSUFFICIENT
 from livingproof_evaluator_scenario.result import (
     DISPLAY_NAME,
     ICON,
-    PACKAGE_VERSION,
     SHORT_TITLE,
+    package_version,
     trial_result,
     write_run,
 )
@@ -44,7 +44,7 @@ def test_descriptor_names_the_scenario_evaluator_and_inlines_the_icon():
     assert document["evaluator"]["execution"] == "deterministic"
     assert document["evaluator"]["publisher"] == "Living Proof Labs"
     assert document["evaluator"]["display_name"] == DISPLAY_NAME
-    assert document["evaluator"]["version"] == PACKAGE_VERSION
+    assert document["evaluator"]["version"] == package_version()
     descriptor = document["descriptor"]
     assert descriptor["title"] == "Scenario evaluator"
     assert descriptor["title"] == document["evaluator"]["display_name"]
@@ -59,6 +59,24 @@ def test_descriptor_names_the_scenario_evaluator_and_inlines_the_icon():
     assert "#0E8785" not in ICON
     assert "currentColor" in ICON
     assert 'd="M6.5 7L10.5 11L17.5 4"' in ICON
+
+
+def test_versions_come_from_package_metadata_not_a_literal(monkeypatch):
+    seen = []
+
+    def fake(name):
+        seen.append(name)
+        return "9.9.9"
+
+    monkeypatch.setattr("importlib.metadata.version", fake)
+    document, _trial = _one()
+    assert seen == ["livingproof-evaluator-scenario"]
+    assert document["evaluator"]["version"] == "9.9.9"
+    assert document["descriptor"]["version"] == "9.9.9"
+    monkeypatch.undo()
+    installed = package_version()
+    assert installed != "9.9.9"
+    assert installed != "0.0.0"
 
 
 def test_playground_steps_pass_and_stock_steps_keep_the_failed_checks():

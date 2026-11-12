@@ -9,14 +9,13 @@ later issue copies failed-step rationales into ``descriptor.findings``.
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
 from pathlib import Path
 
 from livingproof_evaluator_scenario.checks import EVALUATE, EVALUATORS, INSUFFICIENT
 
-# Distribution version declared in pyproject.toml. Semantic-release tags the
-# repository and does not rewrite this string.
-PACKAGE_VERSION = "0.0.0"
+DISTRIBUTION = "livingproof-evaluator-scenario"
 EVALUATOR_ID = "livingproof-scenario"
 DISPLAY_NAME = "Scenario evaluator"
 SHORT_TITLE = "Scenario eval"
@@ -38,6 +37,11 @@ ICON = (
 )
 EVIDENCE_V2 = "livingproof-hallway-evidence/2.0.0"
 _VERDICT = {"PASS": "PASS", "FAIL": "FAIL", INSUFFICIENT: "INCONCLUSIVE"}
+
+
+def package_version() -> str:
+    """Installed distribution version. hatch-vcs fills it from the git tag."""
+    return importlib.metadata.version(DISTRIBUTION)
 
 
 def trial_id(configuration: str, index: int) -> str:
@@ -76,11 +80,12 @@ def trial_result(
         if verdict is None:
             raise ValueError(f"check {item['evaluator']} returned {item['status']!r}")
         steps.append({"id": item["evaluator"], "verdict": verdict, "summary": item["rationale"]})
+    version = package_version()
     return {
         "format": "livingproof-evaluator-result/1.1.0",
         "evaluator": {
             "id": EVALUATOR_ID,
-            "version": PACKAGE_VERSION,
+            "version": version,
             "kind": "scenario",
             "execution": "deterministic",
             "display_name": DISPLAY_NAME,
@@ -96,7 +101,7 @@ def trial_result(
             "icon": ICON,
             "icon_accessible_name": DISPLAY_NAME,
             "purpose": PURPOSE,
-            "version": PACKAGE_VERSION,
+            "version": version,
             "tier": TIER,
             "findings": [],
         },

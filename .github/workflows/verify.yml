@@ -38,6 +38,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
+          # Full history and tags, so hatch-vcs can read the release tag.
+          fetch-depth: 0
+          fetch-tags: true
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           python-version: "3.12"
@@ -87,6 +90,9 @@ jobs:
           tar -xzf "$RUNNER_TEMP/$ACTIONLINT_ARCHIVE" -C "$RUNNER_TEMP" actionlint
           "$RUNNER_TEMP/actionlint" -color
   release:
+    # semantic-release.yml@v3.0.0 analyzes conventional commits, then tags
+    # v${version} and publishes a GitHub release. It does not write a version
+    # into pyproject.toml. hatch-vcs reads that v* tag when the package is built.
     needs: verify
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:

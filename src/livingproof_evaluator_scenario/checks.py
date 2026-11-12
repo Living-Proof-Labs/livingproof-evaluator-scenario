@@ -62,7 +62,7 @@ def _length(v, limit):
 
 
 def failure(check, observed, limit, unit, t, seed, **extra):
-    """Structured failed check, so a report can group failures."""
+    """Structured failed check, so a PR comment can group failures."""
     return {
         "check": check,
         "observed": observed,

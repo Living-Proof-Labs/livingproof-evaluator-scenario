@@ -1,6 +1,6 @@
 [project]
 name = "livingproof-evaluator-scenario"
-version = "0.0.0"
+dynamic = ["version"]
 description = "Deterministic scenario evaluator for Living Proof Labs robot capability verification."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -14,8 +14,18 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling==1.27.0"]
+requires = ["hatchling==1.27.0", "hatch-vcs==0.5.0"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+# No release tag yet: hatch-vcs reports a dev version such as 0.1.devN.
+# After semantic-release tags v1.0.0, the same commit's package version is 1.0.0.
+# local versions are omitted so the string is the tag, not a +g commit suffix.
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+fallback_version = "0.1.dev0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/livingproof_evaluator_scenario"]

@@ -7,6 +7,6 @@ Gherkin vocabulary and the MCAP runner.
 """
 
 from livingproof_evaluator_scenario.checks import EVALUATE, EVALUATORS
-from livingproof_evaluator_scenario.result import PACKAGE_VERSION, trial_result
+from livingproof_evaluator_scenario.result import package_version, trial_result
 
-__all__ = ["EVALUATE", "EVALUATORS", "PACKAGE_VERSION", "trial_result"]
+__all__ = ["EVALUATE", "EVALUATORS", "package_version", "trial_result"]
