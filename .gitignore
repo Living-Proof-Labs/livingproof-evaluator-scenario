@@ -6,3 +6,5 @@ __pycache__/
 artifacts/
 dist/
 *.egg-info/
+.docs-venv/
+artifacts-thresholds.json

@@ -1,5 +1,8 @@
 # livingproof-evaluator-scenario
 
+**Start here: documentation** — [manual source](docs/index.md).
+Publication is pending; this link does not claim a live deployment.
+
 Deterministic scenario evaluator for Living Proof Labs robot capability specifications.
 
 This repository will hold a generic Gherkin step vocabulary over observables and world places, and a runner that reads MCAP through an observation binding. Spec authors write no code. Scenarios are written in Gherkin. Example steps include:
