@@ -26,3 +26,18 @@ tasks:
     cmds:
       - task: check
       - task: test
+
+  docs:setup:
+    desc: Install locked documentation tools separately from runtime dependencies
+    cmds:
+      - uv venv --python 3.12 .docs-venv
+      - uv pip sync --python .docs-venv/bin/python --require-hashes tools/docs/requirements.lock
+  docs:build:
+    desc: Generate references and build the branded manual
+    cmds:
+      - uv run --locked --no-sync python tools/docs/build.py
+      - .docs-venv/bin/zensical build --clean
+  docs:verify:
+    desc: Check rendered local links, fragments and shared branding
+    cmds:
+      - python3 tools/docs/verify.py

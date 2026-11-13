@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+site_name: Living Proof Labs scenario evaluator
+site_url: https://docs.livingprooflabs.com/livingproof-evaluator-scenario/
+repo_url: https://github.com/Living-Proof-Labs/livingproof-evaluator-scenario
+strict: true
+use_directory_urls: false
+docs_dir: artifacts/docs-source
+site_dir: artifacts/site
+theme:
+  name: zensical
+  font: false
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: custom
+      accent: custom
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: custom
+      accent: custom
+extra_css:
+  - assets/brand.css
+markdown_extensions:
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.superfences
+nav:
+  - Documentation home: https://docs.livingprooflabs.com/
+  - Start here: index.md
+  - Guides: guide.md
+  - Reference: reference.md
+  - Verification: verification.md
+  - Contribute: contribute.md
+  - Version and source: version.md
+  - License: license.md
