@@ -121,6 +121,16 @@ def _insufficient(name, what, eid, seed):
     )
 
 
+def _inconsistent(name, what, eid, seed):
+    """The stored record and its trace disagree, so neither is graded."""
+    return assessment(
+        name,
+        INSUFFICIENT,
+        f"observation {what} disagrees with its trace{_seed(seed)}",
+        eid,
+    )
+
+
 def _trace(observation):
     trace = observation.get("trace") or {}
     if not isinstance(trace, dict):
@@ -320,6 +330,12 @@ def fail_absent_or_greater(
         )
     if (t is None) != (end != "crossed_exit"):
         return _insufficient(name, "exit_time", eid, seed)
+    # The exit is the first step the sample rule accepts. A stored exit_time
+    # that is not that step, or a "not reached" record whose trace crosses,
+    # is a record problem, not a robot result.
+    first = first_crossing(_trace(observation), route, exit_place)
+    if first is not None and (t is None or first[0] != t):
+        return _inconsistent(name, "exit_time", eid, seed)
     if t is not None:
         previous, sample = _claim_step(_trace(observation), t)
         if sample is None or previous is None:
@@ -394,6 +410,9 @@ def fail_greater(
     value, limit = extreme["value"], _limit(check, limits)
     margin = round(limit - value, 6)
     a, b = _length(value, limit)
+    if value <= limit and first_distance_excess(_trace(observation), route, limit) is not None:
+        # A trace sample is farther from the route than the stored maximum allows.
+        return _inconsistent(name, "max_abs_lateral", eid, seed)
     if value > limit:
         # First time over the limit. On the straight route this is the same sample as |y|.
         t = first_distance_excess(_trace(observation), route, limit)
