@@ -1,15 +1,15 @@
 # Scenario evaluator
 
-The deterministic scenario evaluator checks stored hallway observations for
-Living Proof Labs robot capability verification. Start with the [guide](guide.md)
-to evaluate a checked-in evidence fixture, or inspect the generated
+The deterministic scenario evaluator checks each step of a scenario against
+the limits in its spec. Start with the [guide](guide.md) to evaluate a
+checked-in evidence fixture, or inspect the generated
 [command, API and Task reference](reference.md).
 
-The current implementation provides four hallway checks: reaching the exit,
-lateral offset, wall contact and base height. It writes one
-`livingproof-evaluator-result/1.1.0` document per trial. It does not grade a run
-or edit a bundle. Descriptor findings remain empty. The generic Gherkin
-vocabulary and MCAP runner are not implemented yet.
+Checks come from the scenario parameter file. The caller passes the resolved
+limits. It writes one `livingproof-evaluator-result/1.1.0` document per trial.
+It does not grade a run or edit a bundle. Descriptor findings remain empty.
+Already-recorded evidence in the frozen format stays readable. The generic
+Gherkin vocabulary and MCAP runner are not implemented yet.
 
 The evaluator contract belongs to
 [livingproof-evaluator](https://github.com/Living-Proof-Labs/livingproof-evaluator),

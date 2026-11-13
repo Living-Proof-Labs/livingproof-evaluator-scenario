@@ -1,0 +1,63 @@
+{
+  "format": "livingproof-evaluator-result/1.1.0",
+  "evaluator": {
+    "id": "livingproof-scenario",
+    "version": "1.1.2",
+    "kind": "scenario",
+    "execution": "deterministic",
+    "display_name": "Scenario",
+    "publisher": "Living Proof Labs",
+    "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6.5 7L10.5 11L17.5 4\"/><rect x=\"4\" y=\"9\" width=\"16\" height=\"11\" rx=\"4\"/></g><g fill=\"currentColor\"><circle cx=\"8.5\" cy=\"14.5\" r=\"1.5\"/><circle cx=\"15.5\" cy=\"14.5\" r=\"1.5\"/></g></svg>"
+  },
+  "inputs": [
+    {
+      "role": "observation",
+      "uri": "trials/trial-01.json",
+      "sha256": "885bffa4f214a5afe5b1e8822158723536ead5fb5dac6a1ce7659f401e8f0daa"
+    },
+    {
+      "role": "manifest",
+      "uri": "manifest.json",
+      "sha256": "505c5a7857d54ca3c51a6903061e1f3d3b476b5a285761e15772a6dc7998557f"
+    }
+  ],
+  "timestamps": {
+    "started_at": "2026-11-13T09:38:39Z",
+    "completed_at": "2026-11-13T09:38:39Z"
+  },
+  "scenario": {
+    "trial_id": "stock-seed-01",
+    "steps": [
+      {
+        "id": "hallway-exit-reached",
+        "verdict": "FAIL",
+        "summary": "left the hallway via wall-right at 8.56 s (trial 1)"
+      },
+      {
+        "id": "hallway-lateral-limit",
+        "verdict": "FAIL",
+        "summary": "lateral 0.66 m > 0.48 m at 7.26 s (trial 1)"
+      },
+      {
+        "id": "hallway-wall-contact",
+        "verdict": "FAIL",
+        "summary": "wall contact depth 0.15 m at 7.80 s (trial 1)"
+      },
+      {
+        "id": "hallway-fall",
+        "verdict": "PASS",
+        "summary": "base height 0.64 m >= 0.44 m, lowest at 0.68 s (trial 1)"
+      }
+    ]
+  },
+  "descriptor": {
+    "title": "Scenario",
+    "short_title": "Scenario",
+    "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6.5 7L10.5 11L17.5 4\"/><rect x=\"4\" y=\"9\" width=\"16\" height=\"11\" rx=\"4\"/></g><g fill=\"currentColor\"><circle cx=\"8.5\" cy=\"14.5\" r=\"1.5\"/><circle cx=\"15.5\" cy=\"14.5\" r=\"1.5\"/></g></svg>",
+    "icon_accessible_name": "Scenario",
+    "purpose": "Checks one trial's hallway steps against its stored observation.",
+    "version": "1.1.2",
+    "tier": "verdict",
+    "findings": []
+  }
+}

@@ -5,7 +5,9 @@ description = "Deterministic scenario evaluator for Living Proof Labs robot capa
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
-dependencies = []
+dependencies = [
+    "livingproof-scenario-parameters @ git+https://github.com/Living-Proof-Labs/robot-capability-specs@v2.2.0#subdirectory=python",
+]
 
 [dependency-groups]
 dev = [
@@ -16,6 +18,9 @@ dev = [
 [build-system]
 requires = ["hatchling==1.27.0", "hatch-vcs==0.5.0"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 source = "vcs"
@@ -29,6 +34,11 @@ fallback_version = "0.1.dev0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/livingproof_evaluator_scenario"]
+
+# The frozen parameter file is data, not a Python module. Editable installs read it
+# beside the source; a wheel must carry the same file.
+[tool.hatch.build.targets.wheel.force-include]
+"src/livingproof_evaluator_scenario/compat/parameters.json" = "livingproof_evaluator_scenario/compat/parameters.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
