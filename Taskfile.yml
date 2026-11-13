@@ -41,3 +41,4 @@ tasks:
     desc: Check rendered local links, fragments and shared branding
     cmds:
       - python3 tools/docs/verify.py
+      - .docs-venv/bin/python tools/docs/test_deploy_guard.py
