@@ -23,6 +23,9 @@ wheels = [
 [[package]]
 name = "livingproof-evaluator-scenario"
 source = { editable = "." }
+dependencies = [
+    { name = "livingproof-scenario-parameters" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -31,12 +34,18 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "livingproof-scenario-parameters", git = "https://github.com/Living-Proof-Labs/robot-capability-specs?subdirectory=python&rev=v2.2.0" }]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = "==8.4.2" },
     { name = "ruff", specifier = "==0.14.2" },
 ]
+
+[[package]]
+name = "livingproof-scenario-parameters"
+version = "2.2.0"
+source = { git = "https://github.com/Living-Proof-Labs/robot-capability-specs?subdirectory=python&rev=v2.2.0#23bec516bda29be7b26555286cbf2e8217ac5c81" }
 
 [[package]]
 name = "packaging"

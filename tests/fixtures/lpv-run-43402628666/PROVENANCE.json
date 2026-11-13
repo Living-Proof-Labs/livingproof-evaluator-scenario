@@ -1,0 +1,140 @@
+{
+  "run_id": 43402628666,
+  "repository": "Living-Proof-Labs/livingproof-verification",
+  "url": "https://github.com/Living-Proof-Labs/livingproof-verification/actions/runs/43402628666",
+  "workflow_name": "verify",
+  "head_sha": "2bcdb51415a9394dec322b1e531cb8780b9d72e4",
+  "display_title": "fix: pin capability-verifier v1.18.5 (#55)",
+  "verifier": "capability-verifier v1.18.5",
+  "note": "artifact_digest is the zip digest recorded in MANIFEST.json for that artifact. file_sha256 is the sha256 of the copied file. Each definition's three trial observations are byte-identical; trial-01 is the copy.",
+  "definitions": [
+    {
+      "id": "g1-playground",
+      "trials_identical": true,
+      "trial_count": 3,
+      "copied_trial": "trial-01.json",
+      "files": {
+        "observation": {
+          "file": "g1-playground-trial-01.json",
+          "source": "unitree-g1-playground-mujoco-hallway-evidence-playground/trials/trial-01.json",
+          "artifact": "unitree-g1-playground-mujoco-hallway-evidence-playground",
+          "artifact_id": 14025806999,
+          "artifact_digest": "sha256:c76ca969829748fe66ac603a244dec1f429f05e223959d2b736206ffbbd86a8f",
+          "file_sha256": "48b6078f3deb763cd1595d727bff52baac95b335de96e57db1402ee6ece9840b"
+        },
+        "result": {
+          "file": "g1-playground-result-01.json",
+          "source": "unitree-g1-playground-mujoco-hallway-evaluator-results-livingproof-scenario-playground/livingproof-scenario/playground-seed-01.json",
+          "artifact": "unitree-g1-playground-mujoco-hallway-evaluator-results-livingproof-scenario-playground",
+          "artifact_id": 14026560231,
+          "artifact_digest": "sha256:d6507141a253d4bb7a7910b2509278c2638a7e6c86d01b632220e770258252c7",
+          "file_sha256": "83dc23a6737b7742aeb10dedd2a729c35b56279a2b112196503bec274d58eec8"
+        },
+        "verification": {
+          "file": "g1-playground-verification.json",
+          "source": "unitree-g1-playground-mujoco-hallway-verified-playground/verification.json",
+          "artifact": "unitree-g1-playground-mujoco-hallway-verified-playground",
+          "artifact_id": 14025483644,
+          "artifact_digest": "sha256:a92cd636204e9b6279f4fa8a31120f3375697a4b5805822463c6b33a56d50898",
+          "file_sha256": "57b3c95541c7083bbb23a6c57e46adcfb95b1800e664a0760289da5f3716e599"
+        }
+      }
+    },
+    {
+      "id": "g1-stock",
+      "trials_identical": true,
+      "trial_count": 3,
+      "copied_trial": "trial-01.json",
+      "files": {
+        "observation": {
+          "file": "g1-stock-trial-01.json",
+          "source": "unitree-g1-stock-mujoco-hallway-evidence-stock/trials/trial-01.json",
+          "artifact": "unitree-g1-stock-mujoco-hallway-evidence-stock",
+          "artifact_id": 14026261052,
+          "artifact_digest": "sha256:a227ea3dd0dfe5bef4c2a9dfebabe085a5e0bbbe90df937ea1c8fdc6623fefd8",
+          "file_sha256": "16223272b2ddd3e13b4053e2b756a61b251c1c2ff2d858a6936efbefa4120a46"
+        },
+        "result": {
+          "file": "g1-stock-result-01.json",
+          "source": "unitree-g1-stock-mujoco-hallway-evaluator-results-livingproof-scenario-stock/livingproof-scenario/stock-seed-01.json",
+          "artifact": "unitree-g1-stock-mujoco-hallway-evaluator-results-livingproof-scenario-stock",
+          "artifact_id": 14025064670,
+          "artifact_digest": "sha256:f3ba8cce0f82af743336835fb964700836f527bae5cccf1d6dba7b67f7ce757b",
+          "file_sha256": "bee06e2211c76b0e4d535ccaff43144a96fda86b45397eaea38fedfe760cc45e"
+        },
+        "verification": {
+          "file": "g1-stock-verification.json",
+          "source": "unitree-g1-stock-mujoco-hallway-verified-stock/verification.json",
+          "artifact": "unitree-g1-stock-mujoco-hallway-verified-stock",
+          "artifact_id": 14025782288,
+          "artifact_digest": "sha256:bd69671cd4817505ef206c24c0d9cb6b79f94b7390894af52c39e6502726d670",
+          "file_sha256": "7618deb21534aa5e101c37535bb7d50b5538dba2286659d0b693b592a7bacb36"
+        }
+      }
+    },
+    {
+      "id": "go1-playground",
+      "trials_identical": true,
+      "trial_count": 3,
+      "copied_trial": "trial-01.json",
+      "files": {
+        "observation": {
+          "file": "go1-playground-trial-01.json",
+          "source": "unitree-go1-playground-mujoco-hallway-evidence-playground/trials/trial-01.json",
+          "artifact": "unitree-go1-playground-mujoco-hallway-evidence-playground",
+          "artifact_id": 14026011352,
+          "artifact_digest": "sha256:f28113338bc2d5bd13fa17b3c32aebf91885bb22d704736c92b14a8009dc0def",
+          "file_sha256": "b4bb652ea8e3e177160edbca3b8872c21c9b97421558f288d6d660adb4662628"
+        },
+        "result": {
+          "file": "go1-playground-result-01.json",
+          "source": "unitree-go1-playground-mujoco-hallway-evaluator-results-livingproof-scenario-playground/livingproof-scenario/playground-seed-01.json",
+          "artifact": "unitree-go1-playground-mujoco-hallway-evaluator-results-livingproof-scenario-playground",
+          "artifact_id": 14026211109,
+          "artifact_digest": "sha256:b756cee209180e6be0d95915f06f7bc0f10714578ebcce4ffcb4e1d87b193dcd",
+          "file_sha256": "a9926bfe6954e398327fbe7c3f20a13e9bb7cd8741a7e6b7f6e22fa7ec9a8ba4"
+        },
+        "verification": {
+          "file": "go1-playground-verification.json",
+          "source": "unitree-go1-playground-mujoco-hallway-verified-playground/verification.json",
+          "artifact": "unitree-go1-playground-mujoco-hallway-verified-playground",
+          "artifact_id": 14026016548,
+          "artifact_digest": "sha256:ac59dfc25db1fbc5e6520808c98370445747371ec16b762ce0f30b5a14e06eb5",
+          "file_sha256": "1b2c41eb0b8379735292ba2187f8edf7a309329f3f7b76922ff63e4d9e2fdad8"
+        }
+      }
+    },
+    {
+      "id": "t1-stock",
+      "trials_identical": true,
+      "trial_count": 3,
+      "copied_trial": "trial-01.json",
+      "files": {
+        "observation": {
+          "file": "t1-stock-trial-01.json",
+          "source": "booster-t1-stock-mujoco-hallway-evidence-stock/trials/trial-01.json",
+          "artifact": "booster-t1-stock-mujoco-hallway-evidence-stock",
+          "artifact_id": 14024954414,
+          "artifact_digest": "sha256:0a5dab2180caf67f0fad667268295a83a60356d559edc2d717a6c621bce19e0a",
+          "file_sha256": "885bffa4f214a5afe5b1e8822158723536ead5fb5dac6a1ce7659f401e8f0daa"
+        },
+        "result": {
+          "file": "t1-stock-result-01.json",
+          "source": "booster-t1-stock-mujoco-hallway-evaluator-results-livingproof-scenario-stock/livingproof-scenario/stock-seed-01.json",
+          "artifact": "booster-t1-stock-mujoco-hallway-evaluator-results-livingproof-scenario-stock",
+          "artifact_id": 14025443068,
+          "artifact_digest": "sha256:797448221f909c6619867078c6491db2347298a7a588eca8e0d1618c6f039369",
+          "file_sha256": "686ebbc2621eae810fa905f2e5569f336d7f71ee638d8d1d02cc9ffdc098e610"
+        },
+        "verification": {
+          "file": "t1-stock-verification.json",
+          "source": "booster-t1-stock-mujoco-hallway-verified-stock/verification.json",
+          "artifact": "booster-t1-stock-mujoco-hallway-verified-stock",
+          "artifact_id": 14026485519,
+          "artifact_digest": "sha256:80b63a97e9b7da4801f5e80c7c863c961bb3904503f491b04238561d281b365a",
+          "file_sha256": "73d7bc3d9b59f9e4ceada532872c9548ac07bb30200b2fdb7982aab020f7cfa5"
+        }
+      }
+    }
+  ]
+}

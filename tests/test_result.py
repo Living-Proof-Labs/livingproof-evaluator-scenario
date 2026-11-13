@@ -9,6 +9,7 @@ from livingproof_evaluator_scenario.checks import INSUFFICIENT
 from livingproof_evaluator_scenario.result import (
     DISPLAY_NAME,
     ICON,
+    PURPOSE,
     SHORT_TITLE,
     package_version,
     trial_result,
@@ -59,6 +60,13 @@ def test_descriptor_names_the_scenario_evaluator_and_inlines_the_icon():
     assert "#0E8785" not in ICON
     assert "currentColor" in ICON
     assert 'd="M6.5 7L10.5 11L17.5 4"' in ICON
+    assert descriptor["purpose"] == PURPOSE
+
+
+def test_purpose_checks_each_step_against_the_limits_in_its_spec():
+    assert PURPOSE == "Checks each step of the scenario against the limits in its spec."
+    document, _trial = _one()
+    assert document["descriptor"]["purpose"] == PURPOSE
 
 
 def test_versions_come_from_package_metadata_not_a_literal(monkeypatch):
@@ -87,12 +95,13 @@ def test_playground_steps_pass_and_stock_steps_keep_the_failed_checks():
     stock, failed = _one("stock")
     by_id = {step["id"]: step for step in stock["scenario"]["steps"]}
     stored = {item["evaluator"]: item for item in failed["assessments"]}
-    assert by_id["hallway-exit-reached"]["verdict"] == "PASS"
-    assert by_id["hallway-fall"]["verdict"] == "PASS"
-    assert by_id["hallway-lateral-limit"]["verdict"] == "FAIL"
-    assert by_id["hallway-wall-contact"]["verdict"] == "FAIL"
+    assert set(by_id) == set(stored)
+    failed_ids = [item["evaluator"] for item in failed["assessments"] if item["status"] == "FAIL"]
+    assert failed_ids
+    assert [by_id[ident]["verdict"] for ident in failed_ids] == ["FAIL"] * len(failed_ids)
     for ident, step in by_id.items():
         assert step["summary"] == stored[ident]["rationale"]
+        assert step["verdict"] == ("PASS" if stored[ident]["status"] == "PASS" else "FAIL")
     assert stock["descriptor"]["findings"] == []
 
 

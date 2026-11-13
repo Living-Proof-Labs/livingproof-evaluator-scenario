@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """Deterministic scenario evaluator.
 
-The hallway checks in :mod:`livingproof_evaluator_scenario.checks` are the
-bodies moved from ``capability_verifier.hallway``. A later slice adds the
-Gherkin vocabulary and the MCAP runner.
+Checks come from the scenario parameter file. A later slice adds the Gherkin
+vocabulary and the MCAP runner. Already-recorded evidence stays readable
+through :mod:`livingproof_evaluator_scenario.compat`.
 """
 
 from livingproof_evaluator_scenario.checks import EVALUATE, EVALUATORS

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Write one result file per trial of a hallway evidence manifest.
+"""Write one result file per trial of an evidence manifest.
 
 The caller supplies the thresholds. This module does not grade the run and
 does not edit a bundle.
@@ -16,6 +16,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from livingproof_evaluator_scenario.compat import evidence_manifest_help
+from livingproof_evaluator_scenario.errors import EvaluationError
 from livingproof_evaluator_scenario.result import write_run
 
 
@@ -25,7 +27,7 @@ def _now() -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("manifest", type=Path, help="livingproof-hallway-evidence/2.0.0 manifest")
+    parser.add_argument("manifest", type=Path, help=evidence_manifest_help())
     parser.add_argument(
         "--thresholds",
         type=Path,
@@ -41,9 +43,13 @@ def main(argv: list[str] | None = None) -> int:
     started = args.started_at or _now()
     completed = args.completed_at or started
     thresholds = json.loads(args.thresholds.read_text(encoding="utf-8"))
-    written = write_run(
-        args.manifest, thresholds, args.out, started_at=started, completed_at=completed
-    )
+    try:
+        written = write_run(
+            args.manifest, thresholds, args.out, started_at=started, completed_at=completed
+        )
+    except EvaluationError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     for path in written:
         print(path)
     return 0

@@ -13,7 +13,8 @@ import importlib.metadata
 import json
 from pathlib import Path
 
-from livingproof_evaluator_scenario.checks import EVALUATE, EVALUATORS, INSUFFICIENT
+from livingproof_evaluator_scenario.checks import INSUFFICIENT, assess
+from livingproof_evaluator_scenario.compat import require_evidence_format
 
 DISTRIBUTION = "livingproof-evaluator-scenario"
 EVALUATOR_ID = "livingproof-scenario"
@@ -21,7 +22,7 @@ DISPLAY_NAME = "Scenario"
 SHORT_TITLE = "Scenario"
 PUBLISHER = "Living Proof Labs"
 TIER = "verdict"
-PURPOSE = "Checks one trial's hallway steps against its stored observation."
+PURPOSE = "Checks each step of the scenario against the limits in its spec."
 # Subset-legal redraw from livingproof-evaluator
 # examples/descriptor/scenario-with-icon/result.json. Same paths, currentColor, no title.
 ICON = (
@@ -35,7 +36,6 @@ ICON = (
     '<circle cx="15.5" cy="14.5" r="1.5"/>'
     "</g></svg>"
 )
-EVIDENCE_V2 = "livingproof-hallway-evidence/2.0.0"
 _VERDICT = {"PASS": "PASS", "FAIL": "FAIL", INSUFFICIENT: "INCONCLUSIVE"}
 
 
@@ -53,9 +53,13 @@ def trial_id(configuration: str, index: int) -> str:
     return f"{configuration}-seed-{index:02d}"
 
 
-def assess(observation: dict, thresholds: dict, trial_id: str, seed=None) -> list[dict]:
-    """The four check records, in ``EVALUATORS`` order."""
-    return [EVALUATE[name](observation, thresholds, trial_id, seed) for name in EVALUATORS]
+def grade_trial(steps: list[dict]) -> str:
+    """Trial outcome from its step verdicts. Every step must pass."""
+    if any(step["verdict"] == "INCONCLUSIVE" for step in steps):
+        return "INCONCLUSIVE"
+    if any(step["verdict"] != "PASS" for step in steps):
+        return "FAIL"
+    return "PASS"
 
 
 def trial_result(
@@ -67,6 +71,8 @@ def trial_result(
     inputs: list[dict],
     started_at: str,
     completed_at: str,
+    world: dict | None = None,
+    parameters: dict | None = None,
 ) -> dict:
     """The result document for one trial. Findings are empty."""
     if not isinstance(trial_id, str) or not trial_id:
@@ -75,7 +81,7 @@ def trial_result(
     _timestamp(completed_at, "completed_at")
     _inputs(inputs)
     steps = []
-    for item in assess(observation, thresholds, trial_id, seed):
+    for item in assess(observation, thresholds, trial_id, seed, world=world, parameters=parameters):
         verdict = _VERDICT.get(item["status"])
         if verdict is None:
             raise ValueError(f"check {item['evaluator']} returned {item['status']!r}")
@@ -115,15 +121,13 @@ def write_run(
     *,
     started_at: str,
     completed_at: str,
+    world: dict | None = None,
+    parameters: dict | None = None,
 ) -> list[Path]:
     """Write one result file per trial. The file name is the result id."""
     manifest_path = Path(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("format") != EVIDENCE_V2:
-        raise ValueError(
-            "this slice reads a livingproof-hallway-evidence/2.0.0 manifest, "
-            f"got {manifest.get('format')!r}"
-        )
+    require_evidence_format(manifest.get("format"))
     configuration = manifest["configuration"]["name"]
     manifest_bytes = manifest_path.read_bytes()
     written = []
@@ -155,6 +159,8 @@ def write_run(
             ],
             started_at=started_at,
             completed_at=completed_at,
+            world=world,
+            parameters=parameters,
         )
         path = out_dir / f"{ident}.json"
         path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")

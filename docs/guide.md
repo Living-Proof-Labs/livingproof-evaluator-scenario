@@ -26,7 +26,8 @@ contract or a claim that the robot passes. Use thresholds from the contract
 appropriate to your own evidence.
 
 Successful writing exits zero even when a step verdict is `FAIL` or
-`INCONCLUSIVE`. Argument errors exit 2; malformed JSON, missing files or invalid
-manifest inputs can raise exceptions and exit nonzero. Use `--help` to inspect
-the actual required inputs. The input is a hallway evidence 2.0.0 manifest,
-not an MCAP file or a Gherkin feature.
+`INCONCLUSIVE`. Argument errors exit 2. An unknown evidence or observation
+format prints `ERROR` and exits 1. Malformed JSON or a missing file can raise
+an exception and exit nonzero. Use `--help` to inspect the actual required
+inputs. The input is a `livingproof-hallway-evidence/2.0.0` manifest, not an
+MCAP file or a Gherkin feature. A neutral input format is not defined yet.
