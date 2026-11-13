@@ -17,8 +17,8 @@ from livingproof_evaluator_scenario.checks import EVALUATE, EVALUATORS, INSUFFIC
 
 DISTRIBUTION = "livingproof-evaluator-scenario"
 EVALUATOR_ID = "livingproof-scenario"
-DISPLAY_NAME = "Scenario evaluator"
-SHORT_TITLE = "Scenario eval"
+DISPLAY_NAME = "Scenario"
+SHORT_TITLE = "Scenario"
 PUBLISHER = "Living Proof Labs"
 TIER = "verdict"
 PURPOSE = "Checks one trial's hallway steps against its stored observation."

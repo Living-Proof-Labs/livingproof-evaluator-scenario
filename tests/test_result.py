@@ -43,18 +43,18 @@ def test_descriptor_names_the_scenario_evaluator_and_inlines_the_icon():
     assert document["evaluator"]["id"] == "livingproof-scenario"
     assert document["evaluator"]["execution"] == "deterministic"
     assert document["evaluator"]["publisher"] == "Living Proof Labs"
-    assert document["evaluator"]["display_name"] == DISPLAY_NAME
+    assert document["evaluator"]["display_name"] == DISPLAY_NAME == "Scenario"
     assert document["evaluator"]["version"] == package_version()
     descriptor = document["descriptor"]
-    assert descriptor["title"] == "Scenario evaluator"
+    assert descriptor["title"] == "Scenario"
     assert descriptor["title"] == document["evaluator"]["display_name"]
-    assert descriptor["short_title"] == SHORT_TITLE == "Scenario eval"
+    assert descriptor["short_title"] == SHORT_TITLE == "Scenario"
     assert descriptor["version"] == document["evaluator"]["version"]
     assert descriptor["tier"] == "verdict"
     assert descriptor["findings"] == []
     assert "grade" not in descriptor
     assert descriptor["icon"] == document["evaluator"]["icon"] == ICON
-    assert descriptor["icon_accessible_name"] == "Scenario evaluator"
+    assert descriptor["icon_accessible_name"] == "Scenario"
     assert "<title" not in ICON
     assert "#0E8785" not in ICON
     assert "currentColor" in ICON
