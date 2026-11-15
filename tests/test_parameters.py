@@ -14,7 +14,13 @@ from livingproof_scenario_parameters import ScenarioParameterError, reference_er
 
 from livingproof_evaluator_scenario.checks import accepted_limits, limits_from_thresholds
 from livingproof_evaluator_scenario.compat import parameters_document
-from livingproof_evaluator_scenario.compat.recorded import PARAMETERS_COMMIT, PARAMETERS_SHA256
+from livingproof_evaluator_scenario.compat.recorded import (
+    PARAMETERS_COMMIT,
+    PARAMETERS_PATH,
+    PARAMETERS_REPOSITORY,
+    PARAMETERS_SHA256,
+    PARAMETERS_TAG,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "tests/fixtures/robot-capability-specs-v2.2.0"
@@ -26,8 +32,10 @@ def _sha(path: Path) -> str:
 
 def _catalog():
     provenance = json.loads((CATALOG / "PROVENANCE.json").read_text(encoding="utf-8"))
-    assert provenance["tag"] == "v2.2.0"
+    assert provenance["tag"] == PARAMETERS_TAG == "v2.2.0"
     assert provenance["commit"] == PARAMETERS_COMMIT
+    assert provenance["repository"] == PARAMETERS_REPOSITORY
+    assert provenance["files"]["parameters.json"]["path"] == PARAMETERS_PATH
     loaded = {}
     for name, meta in provenance["files"].items():
         path = CATALOG / name

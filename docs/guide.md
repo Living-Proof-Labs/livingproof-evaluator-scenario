@@ -56,7 +56,18 @@ sha256 of that document's canonical JSON.
 The result format stays `livingproof-evaluator-result/1.1.0`. The contract
 allows any slug as an input role, so a `thresholds` entry is a valid result.
 Results written before this entry remain valid. A reader that does not use
-the role can ignore it. Step verdicts are unchanged.
+the role can ignore it. Step verdicts are unchanged. Stored results from
+earlier runs are left as they were recorded: their step verdicts do not
+include this input, and re-grading those observations does not change the
+verdicts.
+
+A release tag sets `evaluator.version` to a semantic version such as
+`1.2.0`, which the result schema accepts. On any other commit the installed
+version is a development string such as `1.2.1.dev1`. `descriptor.version`
+is plain text and accepts that string. The schema's rule for
+`evaluator.version` does not. That development string is what the package
+version already was before the thresholds input. The check is described in
+[Verification](verification.md).
 
 Successful writing exits zero even when a step verdict is `FAIL` or
 `INCONCLUSIVE`. Argument errors exit 2. An unknown evidence or observation
