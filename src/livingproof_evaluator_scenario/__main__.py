@@ -2,7 +2,8 @@
 """Write one result file per trial of an evidence manifest.
 
 The caller supplies the thresholds. This module does not grade the run and
-does not edit a bundle.
+does not edit a bundle. It also writes thresholds.json in the output directory:
+the canonical limits each result cites.
 
     python -m livingproof_evaluator_scenario evidence/manifest.json \\
         --thresholds thresholds.json --out evaluator-results/livingproof-scenario
@@ -32,10 +33,21 @@ def main(argv: list[str] | None = None) -> int:
         "--thresholds",
         type=Path,
         required=True,
-        help="JSON object of time_limit, lateral_limit, half_width, and fall_height",
+        help=(
+            "JSON object of time_limit, lateral_limit, half_width, and fall_height. "
+            'Example: {"time_limit": 27.0, "lateral_limit": 0.49, '
+            '"half_width": 0.75, "fall_height": 0.5}. '
+            "The limits actually graded are written to thresholds.json in --out"
+        ),
     )
     parser.add_argument(
-        "--out", type=Path, required=True, help="Directory for one JSON file per trial"
+        "--out",
+        type=Path,
+        required=True,
+        help=(
+            "Directory for one JSON file per trial and for thresholds.json, "
+            "the limits those results cite. Example: evaluator-results/livingproof-scenario"
+        ),
     )
     parser.add_argument("--started-at", help="UTC timestamp, default the current minute")
     parser.add_argument("--completed-at", help="UTC timestamp, default the current minute")

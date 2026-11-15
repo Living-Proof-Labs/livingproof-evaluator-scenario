@@ -1,0 +1,47 @@
+{
+  "repository": "Living-Proof-Labs/livingproof-evaluator",
+  "tag": "v1.0.0",
+  "commit": "9b865bc530a09d763e62cf602b35b5bb57232c0b",
+  "note": "Byte copies of the result-schema files. sha256 is of the copied file. Tests validate emitted results against evaluator-result.schema.json.",
+  "files": {
+    "defs.schema.json": {
+      "sha256": "8ad76e45fb5c7390c787537170e4c581e75de0a14ee3287f3f877656892e69b7"
+    },
+    "descriptor.schema.json": {
+      "sha256": "1163e69ece130b5679ff9e60c07e3e57c4203f49a5d19c27ede1828d8b926856"
+    },
+    "evaluator-request.schema.json": {
+      "sha256": "1fd6e4a81995a1e8cb063cd72715802dd40fdde3c5e65062111a3cc2d92f2591"
+    },
+    "evaluator-result.schema.json": {
+      "sha256": "4f921edd77b4ab8421aec4e5fde8ccbc4380574e7583ab180d696ca75ccf00c4"
+    },
+    "integrity/checks/ci-publisher.schema.json": {
+      "sha256": "488412d097028ac9cc986cdb22803bb3d02d9e1a42363b13b2234fcee72fe20c"
+    },
+    "integrity/checks/completeness.schema.json": {
+      "sha256": "853053f8bc22829b37f7dce44db9947f6a5d16977ee7cb9922ed70adcf9b705f"
+    },
+    "integrity/checks/pins.schema.json": {
+      "sha256": "737a155c75e99963bd73616c458bfef64854818a193e750a018cb7ade1523113"
+    },
+    "integrity/checks/registry.schema.json": {
+      "sha256": "a00007a1dd24ef5610017bb930e0a60bcd9884fc67b311e0630408b0866c29c6"
+    },
+    "integrity/checks/same-input-agreement.schema.json": {
+      "sha256": "45cbb1d815d48984f4300cedefd3448fbb12da8d260ecb550e9936e6d34b83e5"
+    },
+    "integrity/request.schema.json": {
+      "sha256": "a1cdbea54c91e8419662cec4508da56c9bb413a4c07cd81ec4335fa2d838b69f"
+    },
+    "integrity/result.schema.json": {
+      "sha256": "d67b2dcc54af1f68d69139b53a2121bc64e49ec882655ddaece04cea5d75d258"
+    },
+    "scenario/request.schema.json": {
+      "sha256": "83f6e058aabe78fc5d69062eeca194461d96bcef2f89db520e9714658e1cec97"
+    },
+    "scenario/result.schema.json": {
+      "sha256": "dac857a684d5068f033a052ddecd1b1b3052cb760e5c2573cbc1464c896d998f"
+    }
+  }
+}
