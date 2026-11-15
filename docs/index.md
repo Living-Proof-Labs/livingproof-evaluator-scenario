@@ -6,7 +6,9 @@ checked-in evidence fixture, or inspect the generated
 [command, API and Task reference](reference.md).
 
 Checks come from the scenario parameter file. The caller passes the resolved
-limits. It writes one `livingproof-evaluator-result/1.1.0` document per trial.
+limits. Each result cites those limits with a role, URI, and sha256, and the
+cited file is written beside the results. It writes one
+`livingproof-evaluator-result/1.1.0` document per trial.
 It does not grade a run or edit a bundle. Descriptor findings remain empty.
 Already-recorded evidence in the frozen format stays readable. The generic
 Gherkin vocabulary and MCAP runner are not implemented yet.

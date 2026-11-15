@@ -4,6 +4,11 @@
 The descriptor is this evaluator's own entry. Findings stay empty in this
 slice: a failed trial keeps the assessment sentence on the report, and a
 later issue copies failed-step rationales into ``descriptor.findings``.
+
+Each result cites the limits it graded. The citation is a contract input
+reference, ``role`` ``thresholds`` plus a URI and sha256. ``write_run`` writes
+those bytes as ``thresholds.json`` in the output directory, so a copy of that
+directory keeps the file the digest names.
 """
 
 from __future__ import annotations
@@ -13,8 +18,16 @@ import importlib.metadata
 import json
 from pathlib import Path
 
-from livingproof_evaluator_scenario.checks import INSUFFICIENT, assess
+from livingproof_evaluator_scenario.checks import INSUFFICIENT, assess, limits_from_thresholds
 from livingproof_evaluator_scenario.compat import require_evidence_format
+from livingproof_evaluator_scenario.compat.recorded import (
+    PARAMETERS_COMMIT,
+    PARAMETERS_PATH,
+    PARAMETERS_REPOSITORY,
+    PARAMETERS_SHA256,
+    PARAMETERS_TAG,
+    parameters_document,
+)
 
 DISTRIBUTION = "livingproof-evaluator-scenario"
 EVALUATOR_ID = "livingproof-scenario"
@@ -37,6 +50,8 @@ ICON = (
     "</g></svg>"
 )
 _VERDICT = {"PASS": "PASS", "FAIL": "FAIL", INSUFFICIENT: "INCONCLUSIVE"}
+THRESHOLDS_ROLE = "thresholds"
+THRESHOLDS_FILENAME = "thresholds.json"
 
 
 def package_version() -> str:
@@ -62,6 +77,69 @@ def grade_trial(steps: list[dict]) -> str:
     return "PASS"
 
 
+def canonical_json(value) -> bytes:
+    """UTF-8 JSON with sorted keys, no insignificant whitespace, and one trailing newline.
+
+    The sha256 on a thresholds input is the digest of these bytes. The same
+    value always produces the same bytes. ``NaN`` and ``Infinity`` are rejected.
+    """
+    text = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+    )
+    return (text + "\n").encode("utf-8")
+
+
+def parameters_source(parameters: dict | None = None) -> dict:
+    """Specification identity for the parameter document that selected the limits.
+
+    The vendored ``parameters.json`` records its repository, tag, commit, path,
+    and file sha256. Any other document records only the sha256 of its canonical
+    JSON, because no tag or commit is known for it.
+    """
+    known = parameters_document()
+    document = known if parameters is None else parameters
+    if document == known:
+        return {
+            "repository": PARAMETERS_REPOSITORY,
+            "tag": PARAMETERS_TAG,
+            "commit": PARAMETERS_COMMIT,
+            "path": PARAMETERS_PATH,
+            "sha256": PARAMETERS_SHA256,
+        }
+    return {"sha256": hashlib.sha256(canonical_json(document)).hexdigest()}
+
+
+def thresholds_document(thresholds: dict, parameters: dict | None = None) -> dict:
+    """The exact limits graded, plus the parameter-file source when it is known.
+
+    Limit names are the parameter file's names. ``half_width`` is recorded as
+    ``exit_segment``. Keys that grading ignores are omitted, so two objects
+    that grade as the same limits have one document.
+    """
+    document = parameters_document() if parameters is None else parameters
+    return {
+        "limits": limits_from_thresholds(document, thresholds),
+        "parameters": parameters_source(parameters),
+    }
+
+
+def thresholds_bytes(thresholds: dict, parameters: dict | None = None) -> bytes:
+    """Canonical bytes of :func:`thresholds_document`. This is the digest input."""
+    return canonical_json(thresholds_document(thresholds, parameters))
+
+
+def thresholds_input(
+    thresholds: dict, parameters: dict | None = None, *, uri: str = THRESHOLDS_FILENAME
+) -> dict:
+    """Contract input reference for the limits that will be graded.
+
+    ``role``, ``uri``, and ``sha256`` are the only fields. ``uri`` is the file
+    name :func:`write_run` writes beside the results.
+    """
+    raw = thresholds_bytes(thresholds, parameters)
+    return {"role": THRESHOLDS_ROLE, "uri": uri, "sha256": hashlib.sha256(raw).hexdigest()}
+
+
 def trial_result(
     observation: dict,
     thresholds: dict,
@@ -74,11 +152,24 @@ def trial_result(
     world: dict | None = None,
     parameters: dict | None = None,
 ) -> dict:
-    """The result document for one trial. Findings are empty."""
+    """The result document for one trial. Findings are empty.
+
+    ``inputs`` gains the thresholds reference for the limits this call grades.
+    A caller-supplied entry with that role is replaced, so the digest is the
+    canonical limits rather than a digest the caller asserted.
+    """
     if not isinstance(trial_id, str) or not trial_id:
         raise ValueError("trial_id is missing")
     _timestamp(started_at, "started_at")
     _timestamp(completed_at, "completed_at")
+    if not isinstance(inputs, list) or not inputs:
+        raise ValueError("inputs must list at least one artifact")
+    inputs = [
+        item
+        for item in inputs
+        if not (isinstance(item, dict) and item.get("role") == THRESHOLDS_ROLE)
+    ]
+    inputs.append(thresholds_input(thresholds, parameters))
     _inputs(inputs)
     steps = []
     for item in assess(observation, thresholds, trial_id, seed, world=world, parameters=parameters):
@@ -124,15 +215,23 @@ def write_run(
     world: dict | None = None,
     parameters: dict | None = None,
 ) -> list[Path]:
-    """Write one result file per trial. The file name is the result id."""
+    """Write one result file per trial, and ``thresholds.json`` beside them.
+
+    The file name of each result is the result id. ``thresholds.json`` is the
+    canonical limits every result in this call cites. Its bytes are what the
+    thresholds input's sha256 names, so keeping the output directory keeps the
+    referenced input.
+    """
     manifest_path = Path(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     require_evidence_format(manifest.get("format"))
+    bound = thresholds_bytes(thresholds, parameters)
     configuration = manifest["configuration"]["name"]
     manifest_bytes = manifest_path.read_bytes()
     written = []
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / THRESHOLDS_FILENAME).write_bytes(bound)
     ordered = sorted(manifest["trials"]["results"], key=lambda item: item["index"])
     for trial in ordered:
         index = trial["index"]

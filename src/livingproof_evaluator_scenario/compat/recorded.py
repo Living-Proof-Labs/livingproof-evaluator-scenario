@@ -21,6 +21,8 @@ from livingproof_evaluator_scenario.errors import EvaluationError
 PARAMETERS_SHA256 = "9226aa6bc0e577863bdc210514e7e7c3a7edc32f49c4f7b46aa7249837f08b3d"
 PARAMETERS_TAG = "v2.2.0"
 PARAMETERS_COMMIT = "23bec516bda29be7b26555286cbf2e8217ac5c81"
+PARAMETERS_REPOSITORY = "Living-Proof-Labs/robot-capability-specs"
+PARAMETERS_PATH = "specs/scenarios/walk-hallway/parameters.json"
 EVIDENCE_FORMAT = "livingproof-hallway-evidence/2.0.0"
 OBSERVATION_FORMAT = "livingproof-hallway-observation/2.0.0"
 OBSERVATION_ENDS = {
