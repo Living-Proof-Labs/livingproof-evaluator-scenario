@@ -23,17 +23,21 @@ from livingproof_scenario_parameters import (
 )
 
 from livingproof_evaluator_scenario.compat import (
-    allowed_ends,
-    departure_state,
-    departure_text,
     frozen_observation_format,
     limits_alias,
     outside_segment_text,
     parameters_document,
     straight_route,
-    unknown_observation,
 )
 from livingproof_evaluator_scenario.errors import EvaluationError
+from livingproof_evaluator_scenario.observation import (
+    allowed_ends,
+    departure_state,
+    departure_text,
+    distance_field,
+    distance_text,
+    unknown_observation,
+)
 
 PASS, FAIL, INSUFFICIENT = "PASS", "FAIL", "INSUFFICIENT_EVIDENCE"
 # Assessment version recorded on each check. This is not the package version.
@@ -314,7 +318,7 @@ def fail_absent_or_greater(
     if departure is not None:
         if t is not None or departure["malformed"]:
             return _insufficient(name, departure["what"], eid, seed)
-        text = departure_text(departure["via"], departure["time"], _seed(seed))
+        text = departure_text(observation, departure["via"], departure["time"], _seed(seed))
         failed = failure(name, None, time_limit, "s", departure["time"], seed, via=departure["via"])
         return assessment(
             name,
@@ -404,22 +408,23 @@ def fail_greater(
     """Fail when the greatest distance to the route is strictly over the limit."""
     _require_measure(check)
     name = check["evaluator"]
-    extreme = _extreme(observation, "max_abs_lateral")
+    field = distance_field(observation)
+    extreme = _extreme(observation, field)
     if extreme is None:
-        return _insufficient(name, "max_abs_lateral", eid, seed)
+        return _insufficient(name, field, eid, seed)
     value, limit = extreme["value"], _limit(check, limits)
     margin = round(limit - value, 6)
     a, b = _length(value, limit)
     if value <= limit and first_distance_excess(_trace(observation), route, limit) is not None:
         # A trace sample is farther from the route than the stored maximum allows.
-        return _inconsistent(name, "max_abs_lateral", eid, seed)
+        return _inconsistent(name, field, eid, seed)
     if value > limit:
         # First time over the limit. On the straight route this is the same sample as |y|.
         t = first_distance_excess(_trace(observation), route, limit)
         if t is None:
             t = extreme["time"]
         failed = failure(name, value, limit, "m", t, seed)
-        text = f"lateral {a} m > {b} m at {t:.2f} s{_seed(seed)}"
+        text = distance_text(observation, a, b, True, f"{t:.2f} s{_seed(seed)}")
         return assessment(
             name,
             FAIL,
@@ -434,7 +439,7 @@ def fail_greater(
                 "failures": [failed],
             },
         )
-    text = f"lateral {a} m <= {b} m, largest at {extreme['time']:.2f} s{_seed(seed)}"
+    text = distance_text(observation, a, b, False, f"{extreme['time']:.2f} s{_seed(seed)}")
     return assessment(
         name,
         PASS,

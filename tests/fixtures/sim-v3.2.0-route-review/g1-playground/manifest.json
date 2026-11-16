@@ -1,0 +1,614 @@
+{
+  "format": "livingproof-hallway-evidence/2.0.0",
+  "run_id": "walk-corner-unitree-g1-playground-20261116T121636Z",
+  "created": "2026-11-16T12:16:36+00:00",
+  "lock": {
+    "path": "caller.lock.json",
+    "sha256": "14ca9680106a1fe4d6875ceee22fbd0f37288f143547f017ea5fb3114a412a4e",
+    "content": {
+      "plan": {
+        "trials": 1
+      },
+      "scenario": "walk-corner@0.1.0",
+      "world": {
+        "id": "hallway-corner",
+        "version": "0.1.0",
+        "sha256": "8393881e8b38a090f51c3a424ca444623a901f642f75186cb4d41ac7482898f5"
+      },
+      "configurations": [
+        {
+          "name": "playground",
+          "path": "configurations/playground.json",
+          "version": "1.0.1",
+          "sha256": "1fef76d2e5b6eb0ab7627d1f93333e8ca2ec01249a5b1d1f68876186f0657e89"
+        }
+      ],
+      "releases": {
+        "runner": {
+          "tag": "v3.2.0",
+          "commit": "4ff176028a0f20ce30f022d45796d098bd8f1025"
+        },
+        "specs": {
+          "tag": "v2.3.7",
+          "commit": "55f4a8a408793ff698abf4aebf74c1bb66f500d0"
+        }
+      }
+    }
+  },
+  "pending_release": [],
+  "plan": {
+    "trials": {
+      "count": 1
+    }
+  },
+  "start": {
+    "spawn": "spawn-entrance",
+    "pose": "nominal",
+    "offset": null
+  },
+  "preconditions": [
+    {
+      "name": "fits_width",
+      "met": true,
+      "detail": "0.52 + 2 x clearance = 0.62 m vs 1.5 m"
+    },
+    {
+      "name": "configuration_offered",
+      "met": true,
+      "detail": "playground"
+    },
+    {
+      "name": "velocity_interface",
+      "met": true,
+      "detail": "interface ['velocity_command']"
+    },
+    {
+      "name": "simulator_declared",
+      "met": true,
+      "detail": "simulators ['mujoco']"
+    },
+    {
+      "name": "scenario_supported",
+      "met": true,
+      "detail": "walk-corner"
+    }
+  ],
+  "robot": {
+    "id": "unitree-g1",
+    "profile_sha256": "97c0b52db16b80e14bc4d460488d11a78d8f6cef3b096e833e05fccb5d374f4d",
+    "profile": {
+      "$comment": "Robot profile (robot-capability-specs v2.3.0, specs/robots). Supported scenarios are declared on manifest.json, not on this profile. model_source is the Playground G1 MJCF used for every configuration; its meshes are mujoco_menagerie unitree_g1 @ 1b86ece (BSD-3-Clause, (c) Unitree Robotics), pinned in pins.json with every other upstream file.",
+      "format": "livingproof-robot-profile/0.1",
+      "id": "unitree-g1",
+      "manufacturer": "Unitree Robotics",
+      "model": "G1 (29 degrees of freedom, rev 1.0, no hands)",
+      "class": "humanoid",
+      "model_source": {
+        "repo": "https://github.com/google-deepmind/mujoco_playground",
+        "path": "mujoco_playground/_src/locomotion/g1/xmls/g1_mjx_feetonly.xml",
+        "commit": "12ad7f3842791ced39f27e5ac96d066bbe361653",
+        "sha256": "fae73d06ae6957ab38e59c67cac5b3665db6de27cd741602dd93951e3f82b72c",
+        "license": "Apache-2.0 (MJCF); meshes BSD-3-Clause (Unitree Robotics, via mujoco_menagerie)"
+      },
+      "dimensions": {
+        "width": {
+          "value": 0.52,
+          "unit": "m",
+          "source": "measured",
+          "ref": "task profile:measure (mesh vertices, widest of the knees_bent and home keyframes)"
+        },
+        "length": {
+          "value": 0.29,
+          "unit": "m",
+          "source": "measured",
+          "ref": "task profile:measure (mesh vertices, longest of the knees_bent and home keyframes)"
+        },
+        "height": {
+          "value": 1.32,
+          "unit": "m",
+          "source": "published",
+          "ref": "Unitree G1 specification sheet (1320 mm standing)"
+        },
+        "mass": {
+          "value": 33.34,
+          "unit": "kg",
+          "source": "measured",
+          "ref": "task profile:measure (sum of MJCF body masses)"
+        }
+      },
+      "configurations": [
+        {
+          "name": "stock",
+          "path": "configurations/stock.json"
+        },
+        {
+          "name": "playground",
+          "path": "configurations/playground.json"
+        }
+      ],
+      "default_configuration": "playground",
+      "simulators": [
+        "mujoco"
+      ]
+    }
+  },
+  "configuration": {
+    "name": "playground",
+    "version": "1.0.1",
+    "sha256": "1fef76d2e5b6eb0ab7627d1f93333e8ca2ec01249a5b1d1f68876186f0657e89",
+    "profile": {
+      "$comment": "Configuration profile (robot-capability-specs v2.0.2). Gains and limits are the Playground's published values, copied here so this file states what runs; tests check them against the pinned upstream files.",
+      "format": "livingproof-configuration-profile/0.1",
+      "robot": "unitree-g1",
+      "name": "playground",
+      "version": "1.0.1",
+      "summary": "Google DeepMind MuJoCo Playground G1 joystick controller (g1_policy.onnx) with the Playground's own position gains.",
+      "controller": {
+        "publisher": "Google DeepMind",
+        "artifact": {
+          "repo": "https://github.com/google-deepmind/mujoco_playground",
+          "path": "mujoco_playground/experimental/sim2sim/onnx/g1_policy.onnx",
+          "commit": "12ad7f3842791ced39f27e5ac96d066bbe361653",
+          "sha256": "db2eb258494c1297c43d2b9ffa94cdbde97654c2a44cbab0b40fd4b990752a5b",
+          "license": "Apache-2.0"
+        },
+        "format": "onnx",
+        "interface": [
+          "velocity_command"
+        ],
+        "rate_hz": 50
+      },
+      "locomotion": {
+        "max_speed": {
+          "value": 1.0,
+          "unit": "m/s",
+          "source": "published",
+          "ref": "Playground G1 joystick command range vx [-1, 1]"
+        },
+        "nominal_base_height": {
+          "value": 0.73,
+          "unit": "m",
+          "source": "measured",
+          "ref": "measured with task profile:stand in livingproof-unitree-g1 v1.0.4"
+        },
+        "fall_base_height": {
+          "value": 0.5,
+          "unit": "m",
+          "source": "chosen",
+          "reason": "About two-thirds of the standing pelvis height; the same rule for both configurations."
+        }
+      },
+      "settings": {
+        "adapter": "playground_joystick",
+        "reference": {
+          "repo": "https://github.com/google-deepmind/mujoco_playground",
+          "path": "mujoco_playground/experimental/sim2sim/play_g1_joystick.py",
+          "commit": "12ad7f3842791ced39f27e5ac96d066bbe361653",
+          "sha256": "fa126d024db3330d3fbd8927ee62e6a144a1e56b64338317e5cc032445cd62d6",
+          "license": "Apache-2.0"
+        },
+        "ctrl_dt_s": 0.02,
+        "action_scale": 0.5,
+        "gait_hz": 1.5,
+        "gait_offsets_rad": [
+          0.0,
+          3.141592653589793
+        ],
+        "observation": {
+          "linvel_sensor": "local_linvel_pelvis",
+          "gyro_sensor": "gyro_pelvis",
+          "imu_site": "imu_in_pelvis"
+        },
+        "initial_keyframe": "knees_bent",
+        "default_pose": "knees_bent keyframe qpos[7:]",
+        "gains": {
+          "kp": {
+            "left_hip_pitch_joint": 75.0,
+            "left_hip_roll_joint": 75.0,
+            "left_hip_yaw_joint": 75.0,
+            "left_knee_joint": 75.0,
+            "left_ankle_pitch_joint": 20.0,
+            "left_ankle_roll_joint": 2.0,
+            "right_hip_pitch_joint": 75.0,
+            "right_hip_roll_joint": 75.0,
+            "right_hip_yaw_joint": 75.0,
+            "right_knee_joint": 75.0,
+            "right_ankle_pitch_joint": 20.0,
+            "right_ankle_roll_joint": 2.0,
+            "waist_yaw_joint": 75.0,
+            "waist_roll_joint": 75.0,
+            "waist_pitch_joint": 75.0,
+            "left_shoulder_pitch_joint": 75.0,
+            "left_shoulder_roll_joint": 75.0,
+            "left_shoulder_yaw_joint": 75.0,
+            "left_elbow_joint": 75.0,
+            "left_wrist_roll_joint": 2.0,
+            "left_wrist_pitch_joint": 2.0,
+            "left_wrist_yaw_joint": 2.0,
+            "right_shoulder_pitch_joint": 75.0,
+            "right_shoulder_roll_joint": 75.0,
+            "right_shoulder_yaw_joint": 75.0,
+            "right_elbow_joint": 75.0,
+            "right_wrist_roll_joint": 2.0,
+            "right_wrist_pitch_joint": 2.0,
+            "right_wrist_yaw_joint": 2.0
+          },
+          "kd": {
+            "left_hip_pitch_joint": 0.0,
+            "left_hip_roll_joint": 0.0,
+            "left_hip_yaw_joint": 0.0,
+            "left_knee_joint": 0.0,
+            "left_ankle_pitch_joint": 0.0,
+            "left_ankle_roll_joint": 0.0,
+            "right_hip_pitch_joint": 0.0,
+            "right_hip_roll_joint": 0.0,
+            "right_hip_yaw_joint": 0.0,
+            "right_knee_joint": 0.0,
+            "right_ankle_pitch_joint": 0.0,
+            "right_ankle_roll_joint": 0.0,
+            "waist_yaw_joint": 0.0,
+            "waist_roll_joint": 0.0,
+            "waist_pitch_joint": 0.0,
+            "left_shoulder_pitch_joint": 0.0,
+            "left_shoulder_roll_joint": 0.0,
+            "left_shoulder_yaw_joint": 0.0,
+            "left_elbow_joint": 0.0,
+            "left_wrist_roll_joint": 0.0,
+            "left_wrist_pitch_joint": 0.0,
+            "left_wrist_yaw_joint": 0.0,
+            "right_shoulder_pitch_joint": 0.0,
+            "right_shoulder_roll_joint": 0.0,
+            "right_shoulder_yaw_joint": 0.0,
+            "right_elbow_joint": 0.0,
+            "right_wrist_roll_joint": 0.0,
+            "right_wrist_pitch_joint": 0.0,
+            "right_wrist_yaw_joint": 0.0
+          },
+          "joint_damping": {
+            "value": {
+              "left_hip_pitch_joint": 2.0,
+              "left_hip_roll_joint": 2.0,
+              "left_hip_yaw_joint": 2.0,
+              "left_knee_joint": 2.0,
+              "left_ankle_pitch_joint": 1.0,
+              "left_ankle_roll_joint": 0.2,
+              "right_hip_pitch_joint": 2.0,
+              "right_hip_roll_joint": 2.0,
+              "right_hip_yaw_joint": 2.0,
+              "right_knee_joint": 2.0,
+              "right_ankle_pitch_joint": 1.0,
+              "right_ankle_roll_joint": 0.2,
+              "waist_yaw_joint": 2.0,
+              "waist_roll_joint": 2.0,
+              "waist_pitch_joint": 2.0,
+              "left_shoulder_pitch_joint": 2.0,
+              "left_shoulder_roll_joint": 2.0,
+              "left_shoulder_yaw_joint": 2.0,
+              "left_elbow_joint": 2.0,
+              "left_wrist_roll_joint": 0.2,
+              "left_wrist_pitch_joint": 0.2,
+              "left_wrist_yaw_joint": 0.2,
+              "right_shoulder_pitch_joint": 2.0,
+              "right_shoulder_roll_joint": 2.0,
+              "right_shoulder_yaw_joint": 2.0,
+              "right_elbow_joint": 2.0,
+              "right_wrist_roll_joint": 0.2,
+              "right_wrist_pitch_joint": 0.2,
+              "right_wrist_yaw_joint": 0.2
+            },
+            "note": "the D term: passive joint damping in the MJCF, unchanged"
+          },
+          "source": "Playground MJCF <position> actuators"
+        },
+        "limits": {
+          "target_range_rad": {
+            "left_hip_pitch_joint": [
+              -2.5307,
+              2.8798
+            ],
+            "left_hip_roll_joint": [
+              -0.5236000000000001,
+              2.9671
+            ],
+            "left_hip_yaw_joint": [
+              -2.7576,
+              2.7576
+            ],
+            "left_knee_joint": [
+              -0.0872670000000002,
+              2.8798
+            ],
+            "left_ankle_pitch_joint": [
+              -0.87267,
+              0.5236
+            ],
+            "left_ankle_roll_joint": [
+              -0.2618,
+              0.2618
+            ],
+            "right_hip_pitch_joint": [
+              -2.5307,
+              2.8798
+            ],
+            "right_hip_roll_joint": [
+              -0.5236000000000001,
+              2.9671
+            ],
+            "right_hip_yaw_joint": [
+              -2.7576,
+              2.7576
+            ],
+            "right_knee_joint": [
+              -0.0872670000000002,
+              2.8798
+            ],
+            "right_ankle_pitch_joint": [
+              -0.87267,
+              0.5236
+            ],
+            "right_ankle_roll_joint": [
+              -0.2618,
+              0.2618
+            ],
+            "waist_yaw_joint": [
+              -2.618,
+              2.618
+            ],
+            "waist_roll_joint": [
+              -0.52,
+              0.52
+            ],
+            "waist_pitch_joint": [
+              -0.52,
+              0.52
+            ],
+            "left_shoulder_pitch_joint": [
+              -3.0892,
+              2.6704
+            ],
+            "left_shoulder_roll_joint": [
+              -1.5882,
+              2.2515
+            ],
+            "left_shoulder_yaw_joint": [
+              -2.618,
+              2.618
+            ],
+            "left_elbow_joint": [
+              -1.0471999999999997,
+              2.0944
+            ],
+            "left_wrist_roll_joint": [
+              -1.97222,
+              1.97222
+            ],
+            "left_wrist_pitch_joint": [
+              -1.61443,
+              1.61443
+            ],
+            "left_wrist_yaw_joint": [
+              -1.61443,
+              1.61443
+            ],
+            "right_shoulder_pitch_joint": [
+              -3.0892,
+              2.6704
+            ],
+            "right_shoulder_roll_joint": [
+              -2.2515,
+              1.5882
+            ],
+            "right_shoulder_yaw_joint": [
+              -2.618,
+              2.618
+            ],
+            "right_elbow_joint": [
+              -1.0471999999999997,
+              2.0944
+            ],
+            "right_wrist_roll_joint": [
+              -1.97222,
+              1.97222
+            ],
+            "right_wrist_pitch_joint": [
+              -1.61443,
+              1.61443
+            ],
+            "right_wrist_yaw_joint": [
+              -1.61443,
+              1.61443
+            ]
+          },
+          "target_range_note": "policy targets clamped as the <position> actuators' ctrlrange (inheritrange) does",
+          "torque_limits_nm": {
+            "value": {
+              "left_hip_pitch_joint": [
+                -88.0,
+                88.0
+              ],
+              "left_hip_roll_joint": [
+                -139.0,
+                139.0
+              ],
+              "left_hip_yaw_joint": [
+                -88.0,
+                88.0
+              ],
+              "left_knee_joint": [
+                -139.0,
+                139.0
+              ],
+              "left_ankle_pitch_joint": [
+                -50.0,
+                50.0
+              ],
+              "left_ankle_roll_joint": [
+                -50.0,
+                50.0
+              ],
+              "right_hip_pitch_joint": [
+                -88.0,
+                88.0
+              ],
+              "right_hip_roll_joint": [
+                -139.0,
+                139.0
+              ],
+              "right_hip_yaw_joint": [
+                -88.0,
+                88.0
+              ],
+              "right_knee_joint": [
+                -139.0,
+                139.0
+              ],
+              "right_ankle_pitch_joint": [
+                -50.0,
+                50.0
+              ],
+              "right_ankle_roll_joint": [
+                -50.0,
+                50.0
+              ],
+              "waist_yaw_joint": [
+                -88.0,
+                88.0
+              ],
+              "waist_roll_joint": [
+                -50.0,
+                50.0
+              ],
+              "waist_pitch_joint": [
+                -50.0,
+                50.0
+              ],
+              "left_shoulder_pitch_joint": [
+                -25.0,
+                25.0
+              ],
+              "left_shoulder_roll_joint": [
+                -25.0,
+                25.0
+              ],
+              "left_shoulder_yaw_joint": [
+                -25.0,
+                25.0
+              ],
+              "left_elbow_joint": [
+                -25.0,
+                25.0
+              ],
+              "left_wrist_roll_joint": [
+                -25.0,
+                25.0
+              ],
+              "left_wrist_pitch_joint": [
+                -5.0,
+                5.0
+              ],
+              "left_wrist_yaw_joint": [
+                -5.0,
+                5.0
+              ],
+              "right_shoulder_pitch_joint": [
+                -25.0,
+                25.0
+              ],
+              "right_shoulder_roll_joint": [
+                -25.0,
+                25.0
+              ],
+              "right_shoulder_yaw_joint": [
+                -25.0,
+                25.0
+              ],
+              "right_elbow_joint": [
+                -25.0,
+                25.0
+              ],
+              "right_wrist_roll_joint": [
+                -25.0,
+                25.0
+              ],
+              "right_wrist_pitch_joint": [
+                -5.0,
+                5.0
+              ],
+              "right_wrist_yaw_joint": [
+                -5.0,
+                5.0
+              ]
+            },
+            "source": "published",
+            "ref": "Playground MJCF joint actuatorfrcrange, enforced by the model"
+          }
+        },
+        "actuation": "pd_torque: every 0.002 s physics step runs mj_step1, writes kp (q* - q) - kd dq from current state into motor actuators, then mj_step2 (unitree-foxglove-sdk MotorFirmwareBridge fix); identical for every configuration"
+      },
+      "known_issues": "Steps continuously, so it drifts slowly under a zero command."
+    }
+  },
+  "world": {
+    "id": "hallway-corner",
+    "version": "0.1.0",
+    "clear_width": 1.5,
+    "route_length": 5.5
+  },
+  "environment": {
+    "simulator": {
+      "id": "mujoco",
+      "version": "3.17.0",
+      "adapter": "livingproof-sim-mujoco",
+      "adapter_commit": "4ff176028a0f20ce30f022d45796d098bd8f1025"
+    },
+    "runner": {
+      "version": "3.2.0",
+      "tag": "v3.2.0",
+      "commit": "4ff176028a0f20ce30f022d45796d098bd8f1025"
+    },
+    "base_body": "pelvis",
+    "walls": [
+      "wall-outer-first",
+      "wall-outer-second",
+      "wall-inner-first",
+      "wall-inner-second"
+    ],
+    "source_commit": "b68d523291aea7afca789178e3ace554b2cacbd3"
+  },
+  "host": {
+    "wall_clock_s": 5.443,
+    "cpu": {
+      "sched_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "sched_affinity_count": 8,
+      "process_cpu_count": null,
+      "os_cpu_count": 8
+    }
+  },
+  "trials": {
+    "count": 1,
+    "results": [
+      {
+        "index": 1,
+        "path": "trials/trial-01.json",
+        "sha256": "680cc5c09f42dfbaa118e1f3ecfc2f7c2ac84f015c0a2c3d8c780bec1846fb8b",
+        "trajectory_sha256": "fbcbf280858fef224a735056164f63311f192b634985cd3a2aae528e81625120",
+        "outcome": "crossed_exit",
+        "wall_clock_s": 5.44
+      }
+    ],
+    "reproducibility": {
+      "compared": false,
+      "identical": null,
+      "finding": null
+    }
+  }
+}

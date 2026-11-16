@@ -1,0 +1,8 @@
+{
+  "note": "Real livingproof-sim-mujoco v3.2.0 (4ff1760) walk-corner 0.1.0 runs on world hallway-corner 0.1.0, one trial each, recorded by Cody for robot-capability-specs#40 step 11c. world.json and parameters.json are the files vendored in that sim release.",
+  "world.json": {"source": "livingproof_sim_mujoco/worlds/hallway-corner/0.1.0/world.json", "sha256": "8393881e8b38a090f51c3a424ca444623a901f642f75186cb4d41ac7482898f5"},
+  "parameters.json": {"source": "livingproof_sim_mujoco/scenarios/walk-corner/0.1.0/parameters.json", "sha256": "62f2912c33b557d58cd454daf7d1eea543e919dec0e9b53e613d4101a5a12977"},
+  "g1-stock": {"robot": "livingproof-unitree-g1 PR #54 head f4f12e4 (drive)", "configuration": "stock"},
+  "go1-playground": {"robot": "livingproof-unitree-go1 PR #38 head 3edfce9 (drive)", "configuration": "playground"},
+  "unsupported": {"robot": "livingproof-unitree-g1 main 00c0dd8 manifest (walk-corner not declared)", "configuration": "stock", "result": "UNSUPPORTED: scenario_supported unmet, no trials"}
+}

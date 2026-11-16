@@ -1,0 +1,18 @@
+{
+  "note": "Real livingproof-sim-mujoco v3.2.0 (4ff176028a0f20ce30f022d45796d098bd8f1025) walk-corner 0.1.0 runs on its vendored world, one trial each, recorded by Vera in the review of #18 (robot-capability-specs#40 step 11c). The parameter file used is the one vendored in that sim release, byte-identical to robot-capability-specs v2.3.7 specs/scenarios/walk-corner/parameters.json (sha256 62f2912c33b557d58cd454daf7d1eea543e919dec0e9b53e613d4101a5a12977). They complete the real-run set next to sim-v3.2.0-route (G1 stock and Go1 playground): every configuration of the three robots.",
+  "g1-playground": {
+    "robot": "livingproof-unitree-g1 PR #54 head f4f12e46d680dcadee4a3ea4b38be73c66ca6907 (drive)",
+    "configuration": "playground",
+    "trial_sha256": "680cc5c09f42dfbaa118e1f3ecfc2f7c2ac84f015c0a2c3d8c780bec1846fb8b"
+  },
+  "t1-stock": {
+    "robot": "livingproof-booster-t1 PR #44 head 8dd0e601283d76c601727751ffa37a1a1707a854 (drive)",
+    "configuration": "stock",
+    "trial_sha256": "2adb9c7841b4f6fdbf78f1eedb4ee559061821a181c5534f5658a58c4f8bc311"
+  },
+  "t1-playground": {
+    "robot": "livingproof-booster-t1 PR #44 head 8dd0e601283d76c601727751ffa37a1a1707a854 (drive)",
+    "configuration": "playground",
+    "trial_sha256": "e8197735a4abd4fc5aea6bd9b726ac9bca7566101e3c50fa4226f6f481bf8d1a"
+  }
+}
