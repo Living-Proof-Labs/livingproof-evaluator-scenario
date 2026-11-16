@@ -221,6 +221,10 @@ def write_run(
     canonical limits every result in this call cites. Its bytes are what the
     thresholds input's sha256 names, so keeping the output directory keeps the
     referenced input.
+
+    Every trial is read and graded before anything is written. A trial that cannot
+    be graded (for example an unknown observation format) raises before the output
+    directory is created or changed, so a failed run leaves no partial results.
     """
     manifest_path = Path(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -228,10 +232,7 @@ def write_run(
     bound = thresholds_bytes(thresholds, parameters)
     configuration = manifest["configuration"]["name"]
     manifest_bytes = manifest_path.read_bytes()
-    written = []
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / THRESHOLDS_FILENAME).write_bytes(bound)
+    documents = []
     ordered = sorted(manifest["trials"]["results"], key=lambda item: item["index"])
     for trial in ordered:
         index = trial["index"]
@@ -261,8 +262,14 @@ def write_run(
             world=world,
             parameters=parameters,
         )
-        path = out_dir / f"{ident}.json"
-        path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+        documents.append((f"{ident}.json", json.dumps(document, indent=2) + "\n"))
+    written = []
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / THRESHOLDS_FILENAME).write_bytes(bound)
+    for name, text in documents:
+        path = out_dir / name
+        path.write_text(text, encoding="utf-8")
         written.append(path)
     return written
 
