@@ -20,6 +20,7 @@ from pathlib import Path
 
 from livingproof_evaluator_scenario.checks import INSUFFICIENT, assess, limits_from_thresholds
 from livingproof_evaluator_scenario.compat import require_evidence_format
+from livingproof_evaluator_scenario.errors import EvaluationError
 from livingproof_evaluator_scenario.compat.recorded import (
     PARAMETERS_COMMIT,
     PARAMETERS_PATH,
@@ -205,6 +206,15 @@ def trial_result(
     }
 
 
+def _with_trial(message: str, index, path: str, ident: str) -> str:
+    """``message`` with the failing trial named after its first sentence."""
+    where = f"(trial {index}: {path}, result {ident})"
+    first, sep, rest = message.partition(". ")
+    if not sep:
+        return f"{message.rstrip('.')} {where}."
+    return f"{first} {where}. {rest}"
+
+
 def write_run(
     manifest_path: Path,
     thresholds: dict,
@@ -240,28 +250,31 @@ def write_run(
         observation_path = manifest_path.parent / trial["path"]
         observation_bytes = observation_path.read_bytes()
         observation = json.loads(observation_bytes)
-        document = trial_result(
-            observation,
-            thresholds,
-            ident,
-            seed=("trial", index),
-            inputs=[
-                {
-                    "role": "observation",
-                    "uri": trial["path"],
-                    "sha256": hashlib.sha256(observation_bytes).hexdigest(),
-                },
-                {
-                    "role": "manifest",
-                    "uri": manifest_path.name,
-                    "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
-                },
-            ],
-            started_at=started_at,
-            completed_at=completed_at,
-            world=world,
-            parameters=parameters,
-        )
+        try:
+            document = trial_result(
+                observation,
+                thresholds,
+                ident,
+                seed=("trial", index),
+                inputs=[
+                    {
+                        "role": "observation",
+                        "uri": trial["path"],
+                        "sha256": hashlib.sha256(observation_bytes).hexdigest(),
+                    },
+                    {
+                        "role": "manifest",
+                        "uri": manifest_path.name,
+                        "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+                    },
+                ],
+                started_at=started_at,
+                completed_at=completed_at,
+                world=world,
+                parameters=parameters,
+            )
+        except EvaluationError as exc:
+            raise EvaluationError(_with_trial(str(exc), index, trial["path"], ident)) from exc
         documents.append((f"{ident}.json", json.dumps(document, indent=2) + "\n"))
     written = []
     out_dir = Path(out_dir)
