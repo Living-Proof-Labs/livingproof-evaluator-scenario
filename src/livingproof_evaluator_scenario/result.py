@@ -20,6 +20,7 @@ from pathlib import Path
 
 from livingproof_evaluator_scenario.checks import INSUFFICIENT, assess, limits_from_thresholds
 from livingproof_evaluator_scenario.compat import require_evidence_format
+from livingproof_evaluator_scenario.errors import EvaluationError
 from livingproof_evaluator_scenario.compat.recorded import (
     PARAMETERS_COMMIT,
     PARAMETERS_PATH,
@@ -205,6 +206,15 @@ def trial_result(
     }
 
 
+def _with_trial(message: str, index, path: str, ident: str) -> str:
+    """``message`` with the failing trial named after its first sentence."""
+    where = f"(trial {index}: {path}, result {ident})"
+    first, sep, rest = message.partition(". ")
+    if not sep:
+        return f"{message.rstrip('.')} {where}."
+    return f"{first} {where}. {rest}"
+
+
 def write_run(
     manifest_path: Path,
     thresholds: dict,
@@ -221,6 +231,10 @@ def write_run(
     canonical limits every result in this call cites. Its bytes are what the
     thresholds input's sha256 names, so keeping the output directory keeps the
     referenced input.
+
+    Every trial is read and graded before anything is written. A trial that cannot
+    be graded (for example an unknown observation format) raises before the output
+    directory is created or changed, so a failed run leaves no partial results.
     """
     manifest_path = Path(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -228,10 +242,7 @@ def write_run(
     bound = thresholds_bytes(thresholds, parameters)
     configuration = manifest["configuration"]["name"]
     manifest_bytes = manifest_path.read_bytes()
-    written = []
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / THRESHOLDS_FILENAME).write_bytes(bound)
+    documents = []
     ordered = sorted(manifest["trials"]["results"], key=lambda item: item["index"])
     for trial in ordered:
         index = trial["index"]
@@ -239,30 +250,39 @@ def write_run(
         observation_path = manifest_path.parent / trial["path"]
         observation_bytes = observation_path.read_bytes()
         observation = json.loads(observation_bytes)
-        document = trial_result(
-            observation,
-            thresholds,
-            ident,
-            seed=("trial", index),
-            inputs=[
-                {
-                    "role": "observation",
-                    "uri": trial["path"],
-                    "sha256": hashlib.sha256(observation_bytes).hexdigest(),
-                },
-                {
-                    "role": "manifest",
-                    "uri": manifest_path.name,
-                    "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
-                },
-            ],
-            started_at=started_at,
-            completed_at=completed_at,
-            world=world,
-            parameters=parameters,
-        )
-        path = out_dir / f"{ident}.json"
-        path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+        try:
+            document = trial_result(
+                observation,
+                thresholds,
+                ident,
+                seed=("trial", index),
+                inputs=[
+                    {
+                        "role": "observation",
+                        "uri": trial["path"],
+                        "sha256": hashlib.sha256(observation_bytes).hexdigest(),
+                    },
+                    {
+                        "role": "manifest",
+                        "uri": manifest_path.name,
+                        "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+                    },
+                ],
+                started_at=started_at,
+                completed_at=completed_at,
+                world=world,
+                parameters=parameters,
+            )
+        except EvaluationError as exc:
+            raise EvaluationError(_with_trial(str(exc), index, trial["path"], ident)) from exc
+        documents.append((f"{ident}.json", json.dumps(document, indent=2) + "\n"))
+    written = []
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / THRESHOLDS_FILENAME).write_bytes(bound)
+    for name, text in documents:
+        path = out_dir / name
+        path.write_text(text, encoding="utf-8")
         written.append(path)
     return written
 
