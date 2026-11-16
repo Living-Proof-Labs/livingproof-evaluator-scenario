@@ -59,3 +59,16 @@ def test_a_good_run_still_writes_every_trial_and_the_thresholds(tmp_path):
     written = _write(FIXTURES / "playground" / "manifest.json", out)
     names = sorted(p.name for p in out.iterdir())
     assert names == sorted([p.name for p in written] + ["thresholds.json"])
+
+
+def test_unknown_format_error_names_the_trial(tmp_path):
+    """The ERROR says which trial failed: index, observation path and result id (PR #16 review)."""
+    manifest = _run_with_bad_last_trial(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    last = max(data["trials"]["results"], key=lambda item: item["index"])
+    with pytest.raises(EvaluationError) as raised:
+        _write(manifest, tmp_path / "out")
+    message = str(raised.value)
+    assert message.startswith("ERROR: unknown observation format")
+    assert f"(trial {last['index']}" in message
+    assert last["path"] in message
