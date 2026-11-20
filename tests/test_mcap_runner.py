@@ -20,18 +20,21 @@ from referencing import Registry, Resource
 
 from livingproof_evaluator_scenario import runner
 from livingproof_evaluator_scenario.checks import assess
+from livingproof_evaluator_scenario.compat import parameters_document
 from livingproof_evaluator_scenario.errors import EvaluationError
 
 ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "tests" / "fixtures" / "sim-1e020b2"
 WORLD = json.loads((FIX / "world.json").read_text())
 THRESHOLDS = {"time_limit": 9.0, "lateral_limit": 0.6, "half_width": 0.75, "fall_height": 0.1}
-STEPS = [
-    "hallway-exit-reached",
-    "hallway-lateral-limit",
-    "hallway-wall-contact",
-    "hallway-fall",
-]
+PARAMETERS = parameters_document()
+# The steps are the parameter file's checks; ids by rule so the test names no scenario.
+BY_RULE = {c["fail_when"]: c["evaluator"] for c in PARAMETERS["checks"]}
+EXIT = BY_RULE["absent-or-greater-than-limit"]
+LATERAL = BY_RULE["greater-than-limit"]
+WALL = BY_RULE["not-empty"]
+FALL = BY_RULE["less-than-limit"]
+STEPS = [c["evaluator"] for c in PARAMETERS["checks"]]
 TRIALS = [(kind, n) for kind in ("clear", "contact") for n in ("01", "02")]
 
 
@@ -76,7 +79,7 @@ def synthetic(tmp_path, *, topic="/base_pose", contacts=True, pose_path=("pose",
             writer.register_channel("/wall_contacts", "json", schema)
         for i in range(0, 101):
             t = i / 50
-            body = {"x": -0.5 + t, "y": 0.0, "z": 0.7}
+            body = {"x": -0.5 + 2 * t, "y": 0.0, "z": 0.7}
             message = {}
             node = message
             for key in pose_path[:-1]:
@@ -172,26 +175,26 @@ def test_the_payload_is_the_contracts_scenario_result(kind, n):
 def test_a_clear_trial_passes_exit_lateral_and_wall_and_the_fall_rule_is_the_absolute_height():
     payload = run("clear", "01")
     assert verdicts(payload) == {
-        "hallway-exit-reached": "PASS",
-        "hallway-lateral-limit": "PASS",
-        "hallway-wall-contact": "PASS",
-        "hallway-fall": "FAIL",  # this toy robot falls through the floor
+        EXIT: "PASS",
+        LATERAL: "PASS",
+        WALL: "PASS",
+        FALL: "FAIL",  # this toy robot falls through the floor
     }
     lowered = run("clear", "01", thresholds={**THRESHOLDS, "fall_height": -100.0})
-    assert verdicts(lowered)["hallway-fall"] == "PASS"
+    assert verdicts(lowered)[FALL] == "PASS"
     summary = {s["id"]: s["summary"] for s in payload["steps"]}
-    assert "fall height" not in summary["hallway-wall-contact"]
-    assert "m < 0.10 m" in summary["hallway-fall"]  # the absolute fall_height, not a nominal ratio
+    assert "fall height" not in summary[WALL]
+    assert "m < 0.10 m" in summary[FALL]  # the absolute fall_height, not a nominal ratio
 
 
 def test_a_contact_trial_fails_the_wall_step_with_the_events_depth():
     payload = run("contact", "01")
     got = {s["id"]: s for s in payload["steps"]}
-    assert got["hallway-wall-contact"]["verdict"] == "FAIL"
-    assert "wall-left" in got["hallway-wall-contact"]["summary"]
-    assert "0.13" in got["hallway-wall-contact"]["summary"]
-    assert got["hallway-exit-reached"]["verdict"] == "FAIL"
-    assert got["hallway-lateral-limit"]["verdict"] == "FAIL"
+    assert got[WALL]["verdict"] == "FAIL"
+    assert "wall-left" in got[WALL]["summary"]
+    assert "0.13" in got[WALL]["summary"]
+    assert got[EXIT]["verdict"] == "FAIL"
+    assert got[LATERAL]["verdict"] == "FAIL"
 
 
 def test_an_unbound_body_contact_is_not_evaluated_and_the_other_steps_still_run():
@@ -202,10 +205,10 @@ def test_an_unbound_body_contact_is_not_evaluated_and_the_other_steps_still_run(
     broken["unbound"] = [{"id": "body_contact", "reason": "producer-does-not-carry"}]
     payload = runner.run_trial(paths("clear", "01")[0], broken, THRESHOLDS, WORLD)
     got = {s["id"]: s for s in payload["steps"]}
-    assert got["hallway-wall-contact"]["verdict"] == "NOT_EVALUATED"
-    assert got["hallway-wall-contact"]["reason"] == "unbound_observable"
-    assert "body_contact" in got["hallway-wall-contact"]["summary"]
-    assert got["hallway-exit-reached"]["verdict"] == "PASS"
+    assert got[WALL]["verdict"] == "NOT_EVALUATED"
+    assert got[WALL]["reason"] == "unbound_observable"
+    assert "body_contact" in got[WALL]["summary"]
+    assert got[EXIT]["verdict"] == "PASS"
     assert list(validator("scenario-result.schema.json").iter_errors(payload)) == []
 
 
@@ -217,17 +220,17 @@ def test_an_unbound_base_leaves_exit_and_lateral_not_evaluated():
     broken["unbound"] = [{"id": "base", "reason": "robot-entry-missing"}]
     payload = runner.run_trial(paths("clear", "01")[0], broken, THRESHOLDS, WORLD)
     got = verdicts(payload)
-    assert got["hallway-exit-reached"] == got["hallway-lateral-limit"] == "NOT_EVALUATED"
-    assert got["hallway-wall-contact"] == "PASS"
+    assert got[EXIT] == got[LATERAL] == "NOT_EVALUATED"
+    assert got[WALL] == "PASS"
     reasons = {s.get("reason") for s in payload["steps"] if s["verdict"] == "NOT_EVALUATED"}
     assert reasons == {"unbound_observable"}
 
 
 def test_an_unknown_step_is_not_evaluated_with_that_reason():
-    payload = run("clear", "01", steps=["hallway-fall", "hallway-teleport"])
+    payload = run("clear", "01", steps=[FALL, "teleport"])
     assert [(s["id"], s["verdict"], s.get("reason")) for s in payload["steps"]] == [
-        ("hallway-fall", "FAIL", None),
-        ("hallway-teleport", "NOT_EVALUATED", "unknown_step"),
+        (FALL, "FAIL", None),
+        ("teleport", "NOT_EVALUATED", "unknown_step"),
     ]
 
 
@@ -244,22 +247,21 @@ def test_a_recording_that_never_declares_the_contacts_channel_is_inconclusive_no
     binding["unbound"] = []
     payload = runner.run_trial(mcap, binding, THRESHOLDS, WORLD)
     got = {s["id"]: s for s in payload["steps"]}
-    assert got["hallway-wall-contact"]["verdict"] == "INCONCLUSIVE"
-    assert "/wall_contacts" in got["hallway-wall-contact"]["summary"]
+    assert got[WALL]["verdict"] == "INCONCLUSIVE"
+    assert "/wall_contacts" in got[WALL]["summary"]
 
 
 def test_the_topic_and_field_paths_come_from_the_binding_not_from_the_runner(tmp_path):
-    mcap, binding = synthetic(tmp_path, topic="/custom/pose", pose_path=("where", "at"))
+    mcap, binding = synthetic(
+        tmp_path, topic="/custom/pose", contacts=False, pose_path=("where", "at")
+    )
     payload = runner.run_trial(mcap, binding, THRESHOLDS, WORLD)
     got = verdicts(payload)
-    assert got["hallway-exit-reached"] == "PASS" and got["hallway-fall"] == "PASS"
-    assert got["hallway-wall-contact"] == "NOT_EVALUATED"
+    assert got[EXIT] == "PASS" and got[FALL] == "PASS"
+    assert got[WALL] == "NOT_EVALUATED"
     wrong = copy.deepcopy(binding)
     wrong["observables"]["base"]["topic"] = "/base_pose"  # the runner does not guess a topic
-    assert (
-        verdicts(runner.run_trial(mcap, wrong, THRESHOLDS, WORLD))["hallway-exit-reached"]
-        == "INCONCLUSIVE"
-    )
+    assert verdicts(runner.run_trial(mcap, wrong, THRESHOLDS, WORLD))[EXIT] == "INCONCLUSIVE"
 
 
 @pytest.mark.parametrize(
