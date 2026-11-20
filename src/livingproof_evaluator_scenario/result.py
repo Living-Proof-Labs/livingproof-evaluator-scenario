@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import importlib.metadata
 import json
+from importlib import resources
 from pathlib import Path
 
 from livingproof_evaluator_scenario.checks import INSUFFICIENT, assess, limits_from_thresholds
@@ -37,18 +38,14 @@ SHORT_TITLE = "Scenario"
 PUBLISHER = "Living Proof Labs"
 TIER = "verdict"
 PURPOSE = "Checks each step of the scenario against the limits in its spec."
-# Subset-legal redraw from livingproof-evaluator
-# examples/descriptor/scenario-with-icon/result.json. Same paths, currentColor, no title.
+# The Living Proof mark for this evaluator. The artwork lives in scenario-evaluator-icon.svg, in the
+# subset the report accepts: path, circle, rect and g only, currentColor paint, no title. The
+# accessible name is the descriptor's icon_accessible_name, not a title element.
 ICON = (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">'
-    '<g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-    '<path d="M6.5 7L10.5 11L17.5 4"/>'
-    '<rect x="4" y="9" width="16" height="11" rx="4"/>'
-    "</g>"
-    '<g fill="currentColor">'
-    '<circle cx="8.5" cy="14.5" r="1.5"/>'
-    '<circle cx="15.5" cy="14.5" r="1.5"/>'
-    "</g></svg>"
+    resources.files("livingproof_evaluator_scenario")
+    .joinpath("scenario-evaluator-icon.svg")
+    .read_text(encoding="utf-8")
+    .strip()
 )
 _VERDICT = {"PASS": "PASS", "FAIL": "FAIL", INSUFFICIENT: "INCONCLUSIVE"}
 THRESHOLDS_ROLE = "thresholds"
