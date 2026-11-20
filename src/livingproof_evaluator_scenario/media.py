@@ -138,11 +138,11 @@ def _listed(media_dir: Path, entry, what: str, index) -> Path:
     return path
 
 
-def _thresholds_bytes(thresholds: dict, missing: dict) -> bytes:
+def _thresholds_bytes(thresholds: dict, missing: dict, parameters: dict | None = None) -> bytes:
     if not missing:
-        return result.thresholds_bytes(thresholds)
+        return result.thresholds_bytes(thresholds, parameters)
     document = result.thresholds_document(
-        {**thresholds, **{limits_alias(k) or k: 0 for k in missing}}
+        {**thresholds, **{limits_alias(k) or k: 0 for k in missing}}, parameters
     )
     document["limits"] = {k: v for k, v in document["limits"].items() if k not in missing}
     document["missing"] = dict(sorted(missing.items()))
@@ -217,7 +217,7 @@ def write_media_run(
             f"ERROR: media.json trials must be a list, not {type(trials).__name__}."
         )
     thresholds, missing = thresholds_from_manifest(manifest, parameters)
-    bound = _thresholds_bytes(thresholds, missing)
+    bound = _thresholds_bytes(thresholds, missing, parameters)
     threshold_ref = {
         "role": result.THRESHOLDS_ROLE,
         "uri": THRESHOLDS_URI,

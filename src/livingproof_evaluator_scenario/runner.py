@@ -48,6 +48,7 @@ RULE_OBSERVABLE = {
     "greater-than-limit": "base",
     "not-empty": "body_contact",
     "less-than-limit": "base_height",
+    "not-in-order": "base",
 }
 
 
@@ -232,6 +233,15 @@ def _wall(signal: _Signal):
     )
 
 
+def _in_order(check, signal, limits, route, exit_place, document, world):
+    """``passes-through-places`` on the recorded base track, by the same check the trial path uses."""
+    observation = {"trace": {"samples": _samples(signal)}}
+    item = checks.fail_not_in_order(
+        check, observation, limits, "recording", None, route, exit_place, document, world, None
+    )
+    return {"PASS": PASS, "FAIL": FAIL}.get(item["status"], INCONCLUSIVE), item["rationale"]
+
+
 def _fall(signal: _Signal, limits):
     limit = limits["fall_height"]
     low = min(signal.rows, key=lambda row: row["z"])
@@ -277,7 +287,8 @@ def run_trial(
     limits = _limits(document, thresholds, missing)
     route, exit_place = checks._route_from_world(world, document)
     signals = read_signals(mcap_path, binding)
-    rules = {check["evaluator"]: check["fail_when"] for check in document["checks"]}
+    by_name = {check["evaluator"]: check for check in document["checks"]}
+    rules = {name: check["fail_when"] for name, check in by_name.items()}
     needs = {check["evaluator"]: check.get("limit") for check in document["checks"]}
     results = []
     for step in steps if steps is not None else list(rules):
@@ -317,6 +328,10 @@ def run_trial(
                 verdict, summary = _lateral(_samples(signal), limits, route)
             elif rule == "not-empty":
                 verdict, summary = _wall(signal)
+            elif rule == "not-in-order":
+                verdict, summary = _in_order(
+                    by_name[step], signal, limits, route, exit_place, document, world
+                )
             else:
                 verdict, summary = _fall(signal, limits)
         item = {"id": step, "verdict": verdict, "summary": summary}
