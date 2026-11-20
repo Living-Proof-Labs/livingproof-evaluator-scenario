@@ -1,7 +1,9 @@
 """Real trial MCAP + binding from livingproof-sim-mujoco 1e020b2 (its own test harness, toy robot).
 
-Run inside a livingproof-sim-mujoco checkout at 1e020b2 (paths below are that checkout):
-    python generate.py toy clear/ ; python generate.py touch contact/
+Usage, from any directory, with the sim's virtualenv active (MUJOCO_GL=osmesa on a headless host):
+    python generate.py toy clear/ SIM_CHECKOUT
+    python generate.py touch contact/ SIM_CHECKOUT
+where SIM_CHECKOUT is a livingproof-sim-mujoco checkout at 1e020b2 (default: the current directory).
 """
 
 import json
@@ -10,7 +12,8 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, "/workspace/cody-sim28/tests")
+SIM = Path(sys.argv[3]) if len(sys.argv) > 3 else Path.cwd()
+sys.path.insert(0, str(SIM / "tests"))
 import test_media_binding as t
 from livingproof_sim_mujoco import media
 
