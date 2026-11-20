@@ -53,10 +53,22 @@ def _refused(tmp_path, *, index=None, manifest=None):
     return str(raised.value)
 
 
-@pytest.mark.parametrize("bad", [True, 1.0, "1", 0, -1, None, [1]], ids=repr)
-def test_a_trial_index_that_is_not_an_integer_from_one_to_count_is_refused(tmp_path, bad) -> None:
+@pytest.mark.parametrize("bad", [0, -1], ids=repr)
+def test_an_integer_index_outside_one_to_count_is_refused(tmp_path, bad) -> None:
     message = _refused(tmp_path, index=lambda d: d["trials"][0].update(index=bad))
-    assert "outside the plan (1 to 2)" in message
+    assert f"trial {bad} is outside the plan (1 to 2)" in message
+
+
+@pytest.mark.parametrize("bad", [True, 1.0, "1", [1]], ids=repr)
+def test_an_index_that_is_not_an_integer_is_refused_and_named(tmp_path, bad) -> None:
+    message = _refused(tmp_path, index=lambda d: d["trials"][0].update(index=bad))
+    assert f"index {bad!r} is not an integer" in message
+
+
+def test_a_trial_with_no_index_says_so(tmp_path) -> None:
+    message = _refused(tmp_path, index=lambda d: d["trials"][0].pop("index"))
+    assert "entry 1 has no index" in message
+    assert "None" not in message
 
 
 def test_index_zero_with_a_full_length_list_is_refused(tmp_path) -> None:
@@ -71,7 +83,8 @@ def test_a_trial_that_is_not_an_object_is_refused(tmp_path) -> None:
 
 @pytest.mark.parametrize("bad", ["12", {"a": 1}, None, 2], ids=repr)
 def test_trials_that_is_not_a_list_is_refused(tmp_path, bad) -> None:
-    assert "not a media index" in _refused(tmp_path, index=lambda d: d.update(trials=bad))
+    message = _refused(tmp_path, index=lambda d: d.update(trials=bad))
+    assert f"trials must be a list, not {type(bad).__name__}" in message
 
 
 @pytest.mark.parametrize("bad", [True, 0, -1, 2.0, "2"], ids=repr)
