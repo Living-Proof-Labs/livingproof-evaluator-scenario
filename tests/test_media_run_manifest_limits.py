@@ -5,10 +5,9 @@ Passing tests: a verdict follows a limit changed in the manifest, a missing limi
 default or a PASS, the thresholds file records what was used, and the identity is the one the
 caller stated plus the digest of the installed source.
 
-Strict xfails: media.json is taken as it stands. A run that lists fewer trials than the manifest
-plans, lists one trial index twice, or lists none, is graded without complaint today (the second
-copy overwrites the first result file). Each xfail turns into a failure to remove once the runner
-refuses such a run.
+media.json is checked against the manifest's plan.trials.count: a run that lists fewer or more
+trials than planned, an index outside 1..count, one index twice, or none, is refused with an
+EvaluationError and nothing is written.
 """
 
 from __future__ import annotations
@@ -109,26 +108,24 @@ def _write(tmp_path, index_edit, manifest=None):
     )
 
 
-_STRICT = pytest.mark.xfail(strict=True, reason="media.json is not checked against the manifest")
-
-
-@_STRICT
 def test_a_run_that_lists_fewer_trials_than_the_manifest_plans_is_refused(tmp_path) -> None:
     assert MANIFEST["plan"]["trials"]["count"] == 3  # the fixture plans three trials
-    with pytest.raises(EvaluationError, match="trial"):
-        _write(tmp_path, lambda i: None)  # media.json lists two
+    with pytest.raises(EvaluationError, match="lists 2 trials but the manifest plans 3"):
+        _write(tmp_path, lambda i: None, MANIFEST)  # media.json lists two
 
 
-@_STRICT
 def test_a_trial_index_listed_twice_is_refused(tmp_path) -> None:
-    with pytest.raises(EvaluationError, match="trial"):
-        _write(tmp_path, lambda i: i["trials"].append(copy.deepcopy(i["trials"][0])))
+    with pytest.raises(EvaluationError, match="trial 1 is listed twice"):
+        _write(
+            tmp_path,
+            lambda i: i["trials"].append(copy.deepcopy(i["trials"][0])),
+            _two_trial_manifest(),
+        )
 
 
-@_STRICT
 def test_a_media_json_with_no_trials_is_refused(tmp_path) -> None:
-    with pytest.raises(EvaluationError, match="trial"):
-        _write(tmp_path, lambda i: i.update(trials=[]))
+    with pytest.raises(EvaluationError, match="lists no trials"):
+        _write(tmp_path, lambda i: i.update(trials=[]), _two_trial_manifest())
 
 
 def test_a_binding_file_that_is_not_the_one_media_json_lists_is_refused(tmp_path) -> None:
@@ -150,3 +147,39 @@ def test_a_binding_file_that_is_not_the_one_media_json_lists_is_refused(tmp_path
             identity=IDENTITY,
         )
     assert not (tmp_path / "o").exists()
+
+
+def test_a_trial_index_outside_the_plan_is_refused(tmp_path) -> None:
+    with pytest.raises(EvaluationError, match="trial 7"):
+        _write(tmp_path, lambda i: i["trials"][1].update(index=7), _two_trial_manifest())
+    assert not (tmp_path / "out").exists()
+
+
+def test_a_refused_run_writes_nothing(tmp_path) -> None:
+    with pytest.raises(EvaluationError):
+        _write(
+            tmp_path,
+            lambda i: i["trials"].append(copy.deepcopy(i["trials"][0])),
+            _two_trial_manifest(),
+        )
+    assert not (tmp_path / "out").exists()
+
+
+def test_a_manifest_without_configuration_name_is_a_clear_error(tmp_path) -> None:
+    manifest = copy.deepcopy(MANIFEST)
+    del manifest["configuration"]["name"]
+    with pytest.raises(EvaluationError, match="configuration.name"):
+        _write(tmp_path, lambda i: None, manifest)
+
+
+def test_a_manifest_without_a_trial_count_is_a_clear_error(tmp_path) -> None:
+    manifest = copy.deepcopy(MANIFEST)
+    del manifest["plan"]["trials"]["count"]
+    with pytest.raises(EvaluationError, match="plan.trials.count"):
+        _write(tmp_path, lambda i: None, manifest)
+
+
+def _two_trial_manifest():
+    manifest = copy.deepcopy(MANIFEST)
+    manifest["plan"]["trials"]["count"] = 2
+    return manifest
