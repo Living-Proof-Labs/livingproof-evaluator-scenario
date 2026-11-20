@@ -20,6 +20,10 @@ The observable vocabulary, binding format and evaluator contract live in [living
 
 `evaluator.version` and `descriptor.version` are the installed package version. hatch-vcs reads it from the git tag. Before the first tag that version is a development version such as `0.1.dev1`. Semantic-release tags `v1.0.0` from the `feat:` commit and does not rewrite a version in this file.
 
+## Icon
+
+The evaluator identifies itself in the report with a one-colour Living Proof Labs mark, kept in [`scenario-evaluator-icon.svg`](src/livingproof_evaluator_scenario/scenario-evaluator-icon.svg). Sizes, rules and rendered previews are in [`design/scenario-evaluator-icon`](design/scenario-evaluator-icon/README.md).
+
 ## Develop
 
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/). [Task](https://taskfile.dev) 3.54.0 runs the same commands continuous integration runs. This repository has no published development image yet.

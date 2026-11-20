@@ -59,7 +59,7 @@ def test_descriptor_names_the_scenario_evaluator_and_inlines_the_icon():
     assert "<title" not in ICON
     assert "#0E8785" not in ICON
     assert "currentColor" in ICON
-    assert 'd="M6.5 7L10.5 11L17.5 4"' in ICON
+    assert 'd="M7 5.5L10.5 9L16.5 3"' in ICON
     assert descriptor["purpose"] == PURPOSE
 
 
