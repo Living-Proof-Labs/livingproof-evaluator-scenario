@@ -168,7 +168,9 @@ def _check_trials(trials: list, manifest: dict) -> None:
         raise EvaluationError(f"ERROR: media.json lists no trials; the manifest plans {count}.")
     seen: set[int] = set()
     for position, trial in enumerate(trials, start=1):
-        if not isinstance(trial, dict) or "index" not in trial:
+        if not isinstance(trial, dict):
+            raise EvaluationError(f"ERROR: media.json trial entry {position} is not an object.")
+        if "index" not in trial:
             raise EvaluationError(f"ERROR: media.json trial entry {position} has no index.")
         number = trial["index"]
         if not isinstance(number, int) or isinstance(number, bool):
@@ -184,7 +186,8 @@ def _check_trials(trials: list, manifest: dict) -> None:
         seen.add(number)
     if len(trials) != count:
         raise EvaluationError(
-            f"ERROR: media.json lists {len(trials)} trials but the manifest plans {count}."
+            f"ERROR: media.json lists {len(trials)} {'trial' if len(trials) == 1 else 'trials'} "
+            f"but the manifest plans {count}."
         )
 
 
