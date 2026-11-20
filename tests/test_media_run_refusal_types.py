@@ -59,7 +59,7 @@ def test_an_integer_index_outside_one_to_count_is_refused(tmp_path, bad) -> None
     assert f"trial {bad} is outside the plan (1 to 2)" in message
 
 
-@pytest.mark.parametrize("bad", [True, 1.0, "1", [1]], ids=repr)
+@pytest.mark.parametrize("bad", [True, 1.0, "1", [1], None], ids=repr)
 def test_an_index_that_is_not_an_integer_is_refused_and_named(tmp_path, bad) -> None:
     message = _refused(tmp_path, index=lambda d: d["trials"][0].update(index=bad))
     assert f"index {bad!r} is not an integer" in message
@@ -77,8 +77,15 @@ def test_index_zero_with_a_full_length_list_is_refused(tmp_path) -> None:
     assert "trial 0" in message
 
 
-def test_a_trial_that_is_not_an_object_is_refused(tmp_path) -> None:
-    _refused(tmp_path, index=lambda d: d["trials"].__setitem__(0, 1))
+@pytest.mark.parametrize("bad", [1, "x", None, [1]], ids=repr)
+def test_a_trial_that_is_not_an_object_is_refused_and_named(tmp_path, bad) -> None:
+    message = _refused(tmp_path, index=lambda d: d["trials"].__setitem__(0, bad))
+    assert "trial entry 1 is not an object" in message
+
+
+def test_the_trial_count_is_pluralised(tmp_path) -> None:
+    one = lambda d: d["trials"].pop()  # noqa: E731
+    assert "lists 1 trial but the manifest plans 2" in _refused(tmp_path, index=one)
 
 
 @pytest.mark.parametrize("bad", ["12", {"a": 1}, None, 2], ids=repr)
