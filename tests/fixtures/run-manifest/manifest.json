@@ -1,0 +1,45 @@
+{
+  "format": "livingproof-hallway-evidence/2.0.0",
+  "run_id": "walk-hallway-booster-t1-stock-20261113T093742Z",
+  "plan": {
+    "command_speed": 0.5,
+    "trials": {
+      "count": 3
+    }
+  },
+  "robot": {
+    "id": "booster-t1",
+    "profile": {
+      "class": "humanoid",
+      "dimensions": {
+        "width": {
+          "value": 0.541,
+          "unit": "m",
+          "source": "measured",
+          "ref": "task profile:measure (mesh vertices at the published initial pose)"
+        }
+      }
+    }
+  },
+  "configuration": {
+    "name": "stock",
+    "version": "1.0.0",
+    "profile": {
+      "locomotion": {
+        "fall_base_height": {
+          "value": 0.44,
+          "unit": "m",
+          "source": "chosen",
+          "reason": "About two-thirds of the standing trunk height, the rule used for the G1."
+        }
+      }
+    }
+  },
+  "world": {
+    "id": "hallway-open",
+    "version": "0.1.0",
+    "clear_width": 1.5,
+    "route_length": 5.5,
+    "exit_x": 3.0
+  }
+}
