@@ -1,0 +1,26 @@
+{
+  "generator": "livingproof-sim-mujoco 1e020b2 (feat(media): a contacts channel and the producer and per-trial observation bindings, PR 147), its own media recorder: livingproof_sim_mujoco.media.media() on the test toy robots of tests/test_media_binding.py, 2 trials each. See generate.py.txt. The toy robots are the sim's test robots, not a real robot; the MCAP files, bindings and observations are exactly what that code wrote.",
+  "clear": "toy robot, no wall contact; the robot falls (min base height far below any fall height)",
+  "contact": "toy robot spawned inside the left wall face: one wall-left contact, depth 0.13, and it leaves the hallway outside the exit segment",
+  "world": "world.json is livingproof-sim-mujoco's vendored copy of livingproof-worlds hallway-open 0.1.0",
+  "schema": "binding.schema.json, defs.schema.json and scenario-result.schema.json are livingproof-evaluator v1.6.1 (the v1.6.0 schemas are unchanged in v1.6.1; v1.6.1 adds tests only), unmodified",
+  "sha256": {
+    "clear/observation-trial-01.json": "c5c074142831dc756945f0b88aa23da2a3fa77835e96b2ef74b95fae68d6dc96",
+    "clear/observation-trial-02.json": "c5c074142831dc756945f0b88aa23da2a3fa77835e96b2ef74b95fae68d6dc96",
+    "clear/trial-01.binding.json": "cd77a1eacafdde1cfac8c61176ec086f68a69abe5fa5d2bf9fa0b7272820a9f7",
+    "clear/trial-01.mcap": "d0977440ad4ce9b9af634875e58366042ef10b16eb2736a62f58588f0451756e",
+    "clear/trial-02.binding.json": "d9cf1736232796fe89f6960b1c516735b76b1bb80f0b44b3d1fa0982a7424072",
+    "clear/trial-02.mcap": "d0977440ad4ce9b9af634875e58366042ef10b16eb2736a62f58588f0451756e",
+    "contact/observation-trial-01.json": "fb005f2b1d530077e0f2a1257d79b8d1c7a03a7a7a2b66cc150d245ca30a479e",
+    "contact/observation-trial-02.json": "fb005f2b1d530077e0f2a1257d79b8d1c7a03a7a7a2b66cc150d245ca30a479e",
+    "contact/trial-01.binding.json": "51725682572c1fc709075e9afa65a8cf2a0c106c3802652b6285deaa097a1f3a",
+    "contact/trial-01.mcap": "3b9399ff9bc7f6a95432f352fafd67e60e5e618cc46ada114cdc29e43fa42806",
+    "contact/trial-02.binding.json": "e4b4444a0c8d938672ea0535b4da9de66ce23866d219c006c07eb4d14d5c8166",
+    "contact/trial-02.mcap": "3b9399ff9bc7f6a95432f352fafd67e60e5e618cc46ada114cdc29e43fa42806",
+    "generate.py.txt": "39284734e036ce848054e7a5b65ffe345254cedece2dacfd337aa94254740bc7",
+    "schema/binding.schema.json": "40752052520ec3ce298b95a31cec9aeef459aed7af0fa47837f27a3a227d51c0",
+    "schema/defs.schema.json": "8ad76e45fb5c7390c787537170e4c581e75de0a14ee3287f3f877656892e69b7",
+    "schema/scenario-result.schema.json": "dac857a684d5068f033a052ddecd1b1b3052cb760e5c2573cbc1464c896d998f",
+    "world.json": "d60bb8aa6a72c8403fb6674cc9d803962c1484bc3e163527988e8c57ccec775c"
+  }
+}

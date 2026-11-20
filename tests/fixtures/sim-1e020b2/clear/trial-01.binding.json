@@ -1,0 +1,62 @@
+{
+  "format": "livingproof-observation-binding/1.0.0",
+  "kind": "merged",
+  "trial_id": "trial-01",
+  "robot": {
+    "id": "toy-robot",
+    "configuration": "stock"
+  },
+  "producer": {
+    "id": "livingproof-sim-mujoco"
+  },
+  "recording": {
+    "uri": "trial-01.mcap",
+    "sha256": "d0977440ad4ce9b9af634875e58366042ef10b16eb2736a62f58588f0451756e"
+  },
+  "observables": {
+    "base": {
+      "topic": "/base_pose",
+      "encoding": "json",
+      "schema": "foxglove.PoseInFrame",
+      "fields": {
+        "x": "pose.position.x",
+        "y": "pose.position.y"
+      },
+      "frame": "world",
+      "body": "base"
+    },
+    "base_height": {
+      "topic": "/base_pose",
+      "encoding": "json",
+      "schema": "foxglove.PoseInFrame",
+      "fields": {
+        "z": "pose.position.z"
+      },
+      "frame": "world",
+      "nominal": {
+        "value": 0.3,
+        "unit": "meters",
+        "source": "measured",
+        "ref": "https://example.test/toy-robot.git@762dd0bd895c3c54e6a064a00d082dcf2001c1d5:stock.json"
+      }
+    },
+    "body_contact": {
+      "topic": "/wall_contacts",
+      "encoding": "json",
+      "schema": "livingproof.WallContact",
+      "fields": {
+        "wall": "wall",
+        "start": "start",
+        "end": "end",
+        "depth": "depth"
+      },
+      "frame": "world"
+    }
+  },
+  "bound_observables": [
+    "base",
+    "base_height",
+    "body_contact"
+  ],
+  "unbound": []
+}
