@@ -167,11 +167,17 @@ def _check_trials(trials: list, manifest: dict) -> None:
     if not trials:
         raise EvaluationError(f"ERROR: media.json lists no trials; the manifest plans {count}.")
     seen: set[int] = set()
-    for trial in trials:
-        number = trial.get("index") if isinstance(trial, dict) else None
-        if not isinstance(number, int) or isinstance(number, bool) or not 1 <= number <= count:
+    for position, trial in enumerate(trials, start=1):
+        if not isinstance(trial, dict) or "index" not in trial:
+            raise EvaluationError(f"ERROR: media.json trial entry {position} has no index.")
+        number = trial["index"]
+        if not isinstance(number, int) or isinstance(number, bool):
             raise EvaluationError(
-                f"ERROR: media.json trial {number!r} is outside the plan (1 to {count})."
+                f"ERROR: media.json trial entry {position}: index {number!r} is not an integer."
+            )
+        if not 1 <= number <= count:
+            raise EvaluationError(
+                f"ERROR: media.json trial {number} is outside the plan (1 to {count})."
             )
         if number in seen:
             raise EvaluationError(f"ERROR: media.json trial {number} is listed twice.")
@@ -201,8 +207,12 @@ def write_media_run(
     index = json.loads((media_dir / "media.json").read_text(encoding="utf-8"))
     fmt = index.get("format", "")
     trials = index.get("trials")
-    if not (isinstance(fmt, str) and MEDIA_FORMAT.fullmatch(fmt)) or not isinstance(trials, list):
+    if not (isinstance(fmt, str) and MEDIA_FORMAT.fullmatch(fmt)):
         raise EvaluationError(f"ERROR: media.json format {fmt!r} is not a media index.")
+    if not isinstance(trials, list):
+        raise EvaluationError(
+            f"ERROR: media.json trials must be a list, not {type(trials).__name__}."
+        )
     thresholds, missing = thresholds_from_manifest(manifest, parameters)
     bound = _thresholds_bytes(thresholds, missing)
     threshold_ref = {
