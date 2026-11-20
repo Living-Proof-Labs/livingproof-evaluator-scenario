@@ -228,8 +228,7 @@ def test_a_media_json_without_binding_files_grades_nothing(tmp_path) -> None:
 def test_the_scenario_payload_matches_the_contract_with_the_new_reason(tmp_path) -> None:
     schema = json.loads((FIX / "schema" / "scenario-result.schema.json").read_text())
     reasons = schema["$defs"]["step"]["properties"]["reason"]["enum"]
-    assert "missing_threshold" not in reasons  # the contract change is its own evaluator PR
-    schema["$defs"]["step"]["properties"]["reason"]["enum"] = [*reasons, "missing_threshold"]
+    assert "missing_threshold" in reasons  # livingproof-evaluator v1.8.0 and later
     validator = Draft202012Validator(schema)
     broken = copy.deepcopy(MANIFEST)
     del broken["configuration"]["profile"]["locomotion"]["fall_base_height"]
