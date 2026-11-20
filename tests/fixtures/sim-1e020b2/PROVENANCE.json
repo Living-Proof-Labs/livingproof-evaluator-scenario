@@ -3,7 +3,7 @@
   "clear": "toy robot, no wall contact; the robot falls (min base height far below any fall height)",
   "contact": "toy robot spawned inside the left wall face: one wall-left contact, depth 0.13, and it leaves the hallway outside the exit segment",
   "world": "world.json is livingproof-sim-mujoco's vendored copy of livingproof-worlds hallway-open 0.1.0",
-  "schema": "binding.schema.json, defs.schema.json and scenario-result.schema.json are livingproof-evaluator v1.6.1 (the v1.6.0 schemas are unchanged in v1.6.1; v1.6.1 adds tests only), unmodified",
+  "schema": "binding.schema.json, defs.schema.json and scenario-result.schema.json are livingproof-evaluator v1.8.0 (commit d496dabdb99c5d14c7db7e89a02d2a517c173aca; scenario-result.schema.json is its schema/scenario/result.schema.json), unmodified byte copies. They were v1.6.1 before; v1.8.0 adds the missing_threshold reason",
   "sha256": {
     "clear/observation-trial-01.json": "c5c074142831dc756945f0b88aa23da2a3fa77835e96b2ef74b95fae68d6dc96",
     "clear/observation-trial-02.json": "c5c074142831dc756945f0b88aa23da2a3fa77835e96b2ef74b95fae68d6dc96",
@@ -20,7 +20,7 @@
     "generate.py.txt": "bf9a9ec71b7972a75b60e1c84cb02d078d686c56ce19334e67c5b56659d28a00",
     "schema/binding.schema.json": "40752052520ec3ce298b95a31cec9aeef459aed7af0fa47837f27a3a227d51c0",
     "schema/defs.schema.json": "8ad76e45fb5c7390c787537170e4c581e75de0a14ee3287f3f877656892e69b7",
-    "schema/scenario-result.schema.json": "dac857a684d5068f033a052ddecd1b1b3052cb760e5c2573cbc1464c896d998f",
+    "schema/scenario-result.schema.json": "92a3982e32bdbca75098abba0523ba56731f8f800cd5132d309aff500d03d7e4",
     "world.json": "d60bb8aa6a72c8403fb6674cc9d803962c1484bc3e163527988e8c57ccec775c"
   }
 }
