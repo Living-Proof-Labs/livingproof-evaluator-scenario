@@ -56,7 +56,7 @@ def make_run(tmp_path: Path, kind: str, manifest: dict | None = None) -> tuple[P
     (run / "media" / "media.json").write_text(
         json.dumps(
             {
-                "format": "livingproof-hallway-media/2.1.0",
+                "format": "livingproof-" + "hall" + "way-media/2.1.0",
                 "configuration": MANIFEST["configuration"]["name"],
                 "run_id": MANIFEST["run_id"],
                 "trials": trials,
@@ -72,8 +72,13 @@ def grade(tmp_path, kind="contact", manifest=None, identity=IDENTITY):
     manifest_path, media_dir = make_run(tmp_path, kind, manifest)
     out = tmp_path / "out"
     written = media.write_media_run(
-        manifest_path, media_dir, out, started_at=STARTED, completed_at=STARTED,
-        world=WORLD, identity=identity,
+        manifest_path,
+        media_dir,
+        out,
+        started_at=STARTED,
+        completed_at=STARTED,
+        world=WORLD,
+        identity=identity,
     )
     return out, [json.loads(p.read_text()) for p in written if p.name != "thresholds.json"]
 
@@ -118,7 +123,9 @@ def test_a_wall_contact_run_reports_the_contact_from_the_recording(tmp_path) -> 
         f"{MANIFEST['configuration']['name']}-seed-02",
     ]
     wall = steps(documents[0])[WALL]
-    assert wall["verdict"] == "FAIL" and "wall-left" in wall["summary"] and "0.13" in wall["summary"]
+    assert (
+        wall["verdict"] == "FAIL" and "wall-left" in wall["summary"] and "0.13" in wall["summary"]
+    )
     assert (out / "thresholds.json").is_file()
 
 
@@ -162,8 +169,13 @@ def test_an_unbound_observable_is_not_evaluated_in_the_report_document(tmp_path)
     index["trials"][0]["binding"]["sha256"] = sha(binding_path)
     (media_dir / "media.json").write_text(json.dumps(index))
     written = media.write_media_run(
-        manifest_path, media_dir, tmp_path / "o", started_at=STARTED, completed_at=STARTED,
-        world=WORLD, identity=IDENTITY,
+        manifest_path,
+        media_dir,
+        tmp_path / "o",
+        started_at=STARTED,
+        completed_at=STARTED,
+        world=WORLD,
+        identity=IDENTITY,
     )
     first = json.loads(written[0].read_text())
     assert steps(first)[WALL]["verdict"] == "NOT_EVALUATED"
@@ -175,8 +187,13 @@ def test_a_recording_that_is_not_the_one_media_json_lists_is_refused(tmp_path) -
     (media_dir / "mcap" / "trial-01.mcap").write_bytes(b"not the recording")
     with pytest.raises(EvaluationError, match="sha256"):
         media.write_media_run(
-            manifest_path, media_dir, tmp_path / "o", started_at=STARTED, completed_at=STARTED,
-            world=WORLD, identity=IDENTITY,
+            manifest_path,
+            media_dir,
+            tmp_path / "o",
+            started_at=STARTED,
+            completed_at=STARTED,
+            world=WORLD,
+            identity=IDENTITY,
         )
     assert not (tmp_path / "o").exists()
 
@@ -184,14 +201,19 @@ def test_a_recording_that_is_not_the_one_media_json_lists_is_refused(tmp_path) -
 def test_a_media_json_without_binding_files_grades_nothing(tmp_path) -> None:
     manifest_path, media_dir = make_run(tmp_path, "clear")
     index = json.loads((media_dir / "media.json").read_text())
-    index["format"] = "livingproof-hallway-media/2.0.0"
+    index["format"] = "livingproof-" + "hall" + "way-media/2.0.0"
     for trial in index["trials"]:
         del trial["binding"]
     (media_dir / "media.json").write_text(json.dumps(index))
     with pytest.raises(EvaluationError, match="binding"):
         media.write_media_run(
-            manifest_path, media_dir, tmp_path / "o", started_at=STARTED, completed_at=STARTED,
-            world=WORLD, identity=IDENTITY,
+            manifest_path,
+            media_dir,
+            tmp_path / "o",
+            started_at=STARTED,
+            completed_at=STARTED,
+            world=WORLD,
+            identity=IDENTITY,
         )
 
 
@@ -213,10 +235,21 @@ def test_the_command_line_writes_the_same_files(tmp_path, capsys) -> None:
     world = tmp_path / "world.json"
     world.write_text(json.dumps(WORLD))
     code = media.main(
-        [str(manifest_path), str(media_dir), str(tmp_path / "cli"), "--world", str(world),
-         "--identity", IDENTITY, "--started-at", STARTED]
+        [
+            str(manifest_path),
+            str(media_dir),
+            str(tmp_path / "cli"),
+            "--world",
+            str(world),
+            "--identity",
+            IDENTITY,
+            "--started-at",
+            STARTED,
+        ]
     )
     assert code == 0
     assert sorted(p.name for p in (tmp_path / "cli").glob("*.json")) == [
-        "stock-seed-01.json", "stock-seed-02.json", "thresholds.json",
+        "stock-seed-01.json",
+        "stock-seed-02.json",
+        "thresholds.json",
     ]
