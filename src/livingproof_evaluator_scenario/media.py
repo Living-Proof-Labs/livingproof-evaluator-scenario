@@ -149,6 +149,39 @@ def _thresholds_bytes(thresholds: dict, missing: dict) -> bytes:
     return result.canonical_json(document)
 
 
+def _configuration_name(manifest: dict) -> str:
+    configuration = manifest.get("configuration")
+    name = configuration.get("name") if isinstance(configuration, dict) else None
+    if not isinstance(name, str) or not name.strip():
+        raise EvaluationError("ERROR: the run manifest has no configuration.name (no name).")
+    return name
+
+
+def _check_trials(trials: list, manifest: dict) -> None:
+    """Refuse a media.json that disagrees with the plan; nothing is graded or overwritten."""
+    plan = manifest.get("plan")
+    trial_plan = plan.get("trials") if isinstance(plan, dict) else None
+    count = trial_plan.get("count") if isinstance(trial_plan, dict) else None
+    if not isinstance(count, int) or isinstance(count, bool) or count < 1:
+        raise EvaluationError("ERROR: the run manifest has no plan.trials.count (no trial count).")
+    if not trials:
+        raise EvaluationError(f"ERROR: media.json lists no trials; the manifest plans {count}.")
+    seen: set[int] = set()
+    for trial in trials:
+        number = trial.get("index") if isinstance(trial, dict) else None
+        if not isinstance(number, int) or isinstance(number, bool) or not 1 <= number <= count:
+            raise EvaluationError(
+                f"ERROR: media.json trial {number!r} is outside the plan (1 to {count})."
+            )
+        if number in seen:
+            raise EvaluationError(f"ERROR: media.json trial {number} is listed twice.")
+        seen.add(number)
+    if len(trials) != count:
+        raise EvaluationError(
+            f"ERROR: media.json lists {len(trials)} trials but the manifest plans {count}."
+        )
+
+
 def write_media_run(
     manifest_path,
     media_dir,
@@ -177,7 +210,8 @@ def write_media_run(
         "uri": THRESHOLDS_URI,
         "sha256": hashlib.sha256(bound).hexdigest(),
     }
-    configuration = manifest["configuration"]["name"]
+    configuration = _configuration_name(manifest)
+    _check_trials(trials, manifest)
     manifest_ref = {"role": "manifest", "uri": manifest_path.name, "sha256": _sha256(manifest_path)}
     evaluator_ref = {"role": EVALUATOR_ROLE, "uri": identity.strip(), "sha256": source_digest()}
     documents = []

@@ -24,6 +24,10 @@ from livingproof_evaluator_scenario.errors import EvaluationError
 ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "tests" / "fixtures" / "sim-1e020b2"
 MANIFEST = json.loads((ROOT / "tests" / "fixtures" / "run-manifest" / "manifest.json").read_text())
+# The fixture plans three trials; make_run lists the two the fixtures have recordings for, so the
+# default run plans two. A test that wants the real plan uses PLANNED_THREE.
+PLANNED_THREE = copy.deepcopy(MANIFEST)
+MANIFEST["plan"]["trials"]["count"] = 2
 WORLD = json.loads((FIX / "world.json").read_text())
 PARAMETERS = parameters_document()
 BY_RULE = {c["fail_when"]: c["evaluator"] for c in PARAMETERS["checks"]}

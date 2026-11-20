@@ -25,6 +25,7 @@ from test_media_run import (
     IDENTITY,
     LATERAL,
     MANIFEST,
+    PLANNED_THREE,
     STARTED,
     WORLD,
     grade,
@@ -109,9 +110,9 @@ def _write(tmp_path, index_edit, manifest=None):
 
 
 def test_a_run_that_lists_fewer_trials_than_the_manifest_plans_is_refused(tmp_path) -> None:
-    assert MANIFEST["plan"]["trials"]["count"] == 3  # the fixture plans three trials
+    assert PLANNED_THREE["plan"]["trials"]["count"] == 3  # the fixture plans three trials
     with pytest.raises(EvaluationError, match="lists 2 trials but the manifest plans 3"):
-        _write(tmp_path, lambda i: None, MANIFEST)  # media.json lists two
+        _write(tmp_path, lambda i: None, PLANNED_THREE)  # media.json lists two
 
 
 def test_a_trial_index_listed_twice_is_refused(tmp_path) -> None:
@@ -180,6 +181,4 @@ def test_a_manifest_without_a_trial_count_is_a_clear_error(tmp_path) -> None:
 
 
 def _two_trial_manifest():
-    manifest = copy.deepcopy(MANIFEST)
-    manifest["plan"]["trials"]["count"] = 2
-    return manifest
+    return copy.deepcopy(MANIFEST)
