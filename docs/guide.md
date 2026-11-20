@@ -75,3 +75,18 @@ format prints `ERROR` and exits 1. Malformed JSON or a missing file can raise
 an exception and exit nonzero. Use `--help` to inspect the actual required
 inputs. The input is a `livingproof-hallway-evidence/2.0.0` manifest, not an
 MCAP file or a Gherkin feature. A neutral input format is not defined yet.
+
+## Grading a run's media
+
+`python -m livingproof_evaluator_scenario.media MANIFEST MEDIA OUT --world WORLD --identity ID` reads
+each trial's MCAP through its merged observation binding (`media.json` 2.1.0 lists both files) and
+writes one result per trial, with `media/thresholds.json`.
+
+- Limits come from the run manifest only: its world, robot profile, configuration profile and
+  `plan.command_speed`, through the scenario parameter file's formulas. A limit the manifest cannot
+  give is missing, and the step that needs it is `NOT_EVALUATED` with reason `missing_threshold`.
+  No default and no verifier value stands in.
+- Each result carries `evaluator.id` and `evaluator.version`, and an input with role `evaluator`:
+  its `uri` is `ID` (a commit or an image digest) and its `sha256` is the digest of this package's
+  source.
+- A recording or binding that is not the file `media.json` lists is refused, and nothing is written.

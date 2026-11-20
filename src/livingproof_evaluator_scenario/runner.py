@@ -240,11 +240,31 @@ def _fall(signal: _Signal, limits):
     return PASS, f"base height {low['z']:.2f} m >= {limit:.2f} m, lowest at {low['t']:.2f} s"
 
 
-def run_trial(mcap_path, binding, thresholds, world, *, steps=None, parameters=None) -> dict:
+MISSING_THRESHOLD = "missing_threshold"
+
+
+def _limits(document: dict, thresholds: dict, missing: dict | None) -> dict:
+    """The limits the thresholds give. ``missing`` names limits the caller could not resolve."""
+    if missing is None:
+        return checks.limits_from_thresholds(document, thresholds)
+    narrowed = {
+        **document,
+        "limits": {k: v for k, v in document["limits"].items() if k not in missing},
+    }
+    return checks.limits_from_thresholds(narrowed, thresholds)
+
+
+def run_trial(
+    mcap_path, binding, thresholds, world, *, steps=None, parameters=None, missing=None
+) -> dict:
     """Verdicts for one trial: ``{"trial_id": ..., "steps": [{id, verdict, summary[, reason]}]}``.
 
     ``binding`` is a merged binding (dict or file). Its recording sha256 must be that of
     ``mcap_path``. ``thresholds`` and ``world`` are as for :func:`checks.assess`.
+
+    ``missing`` (limit name -> why) lists limits the caller could not resolve. A step that needs
+    one is ``NOT_EVALUATED`` (``missing_threshold``); nothing stands in for it. Without
+    ``missing`` every limit must be given, as before.
     """
     binding = read_binding(binding)
     actual = _sha256(mcap_path)
@@ -254,10 +274,11 @@ def run_trial(mcap_path, binding, thresholds, world, *, steps=None, parameters=N
             f"{binding['recording']['sha256'][:12]}; the binding is for a different recording."
         )
     document = parameters if parameters is not None else checks.parameters_document()
-    limits = checks.limits_from_thresholds(document, thresholds)
+    limits = _limits(document, thresholds, missing)
     route, exit_place = checks._route_from_world(world, document)
     signals = read_signals(mcap_path, binding)
     rules = {check["evaluator"]: check["fail_when"] for check in document["checks"]}
+    needs = {check["evaluator"]: check.get("limit") for check in document["checks"]}
     results = []
     for step in steps if steps is not None else list(rules):
         rule = rules.get(step)
@@ -268,6 +289,18 @@ def run_trial(mcap_path, binding, thresholds, world, *, steps=None, parameters=N
                     "verdict": NOT_EVALUATED,
                     "summary": f"step {step!r} is not one this evaluator knows",
                     "reason": "unknown_step",
+                }
+            )
+            continue
+        if missing and needs.get(step) in missing:
+            limit_name = needs[step]
+            results.append(
+                {
+                    "id": step,
+                    "verdict": NOT_EVALUATED,
+                    "summary": f"the run manifest does not give {limit_name} ({missing[limit_name]}), "
+                    "so the step was not evaluated",
+                    "reason": MISSING_THRESHOLD,
                 }
             )
             continue
