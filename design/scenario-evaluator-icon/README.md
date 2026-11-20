@@ -27,8 +27,8 @@ The verification site's run chips are text only today and have no icon slot.
 ## Previews
 
 Rendered with the capability report's own renderer and stylesheet at
-[`69e2150`](https://github.com/Living-Proof-Labs/livingproof-capability-report/commit/69e2150c4d3103244d06e40a85d77701a81a0a0a)
-(commit), in headless Chromium. The partner marks beside it are the report's example marks (Roboto,
+[this commit](https://github.com/Living-Proof-Labs/livingproof-capability-report/commit/69e2150c4d3103244d06e40a85d77701a81a0a0a)
+of livingproof-capability-report, in headless Chromium. The partner marks beside it are the report's example marks (Roboto,
 Run Integrity, Robot health, Human review), not real partner logos.
 
 - [`scenario-evaluator-icon-preview-light.png`](scenario-evaluator-icon-preview-light.png) and
