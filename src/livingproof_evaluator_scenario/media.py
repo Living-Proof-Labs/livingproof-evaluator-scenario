@@ -3,7 +3,7 @@
 
 This is the pipeline entry for the runner. It takes the run's evidence ``manifest.json`` and the
 ``media`` artifact (``media.json`` 2.1.0, ``mcap/`` with the recordings and their bindings) and
-writes one ``livingproof-evaluator-result/1.1.0`` document per trial, plus ``thresholds.json``.
+writes one ``livingproof-evaluator-result/1.1.0`` document per trial, plus ``media/thresholds.json``.
 
 Limits come from the run manifest alone: the inputs it records (world, robot and configuration
 profile, ``plan.command_speed``) resolved through the scenario parameter file's formulas. A
@@ -41,6 +41,9 @@ from livingproof_evaluator_scenario.errors import EvaluationError
 
 MEDIA_FORMAT = re.compile(r"livingproof-[a-z0-9-]+-media/[0-9]+\.[0-9]+\.[0-9]+")
 EVALUATOR_ROLE = "evaluator"
+# Under its own directory so it sits beside, not over, the thresholds.json that write_run writes
+# into the same results directory (the collector refuses two different files at one path).
+THRESHOLDS_URI = "media/" + result.THRESHOLDS_FILENAME
 
 
 def source_digest() -> str:
@@ -171,7 +174,7 @@ def write_media_run(
     bound = _thresholds_bytes(thresholds, missing)
     threshold_ref = {
         "role": result.THRESHOLDS_ROLE,
-        "uri": result.THRESHOLDS_FILENAME,
+        "uri": THRESHOLDS_URI,
         "sha256": hashlib.sha256(bound).hexdigest(),
     }
     configuration = manifest["configuration"]["name"]
@@ -220,7 +223,8 @@ def write_media_run(
         )
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / result.THRESHOLDS_FILENAME).write_bytes(bound)
+    (out_dir / THRESHOLDS_URI).parent.mkdir(parents=True, exist_ok=True)
+    (out_dir / THRESHOLDS_URI).write_bytes(bound)
     written = []
     for name, document in documents:
         path = out_dir / name

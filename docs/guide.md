@@ -80,7 +80,7 @@ MCAP file or a Gherkin feature. A neutral input format is not defined yet.
 
 `python -m livingproof_evaluator_scenario.media MANIFEST MEDIA OUT --world WORLD --identity ID` reads
 each trial's MCAP through its merged observation binding (`media.json` 2.1.0 lists both files) and
-writes one result per trial, with `thresholds.json`.
+writes one result per trial, with `media/thresholds.json`.
 
 - Limits come from the run manifest only: its world, robot profile, configuration profile and
   `plan.command_speed`, through the scenario parameter file's formulas. A limit the manifest cannot

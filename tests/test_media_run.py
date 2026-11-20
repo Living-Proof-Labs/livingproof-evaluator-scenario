@@ -126,7 +126,11 @@ def test_a_wall_contact_run_reports_the_contact_from_the_recording(tmp_path) -> 
     assert (
         wall["verdict"] == "FAIL" and "wall-left" in wall["summary"] and "0.13" in wall["summary"]
     )
-    assert (out / "thresholds.json").is_file()
+    assert (out / "media" / "thresholds.json").is_file()
+    cited = [i for i in documents[0]["inputs"] if i["role"] == "thresholds"]
+    # Beside the observation-graded results' own thresholds.json, not over it.
+    assert cited[0]["uri"] == "media/thresholds.json"
+    assert cited[0]["sha256"] == sha(out / "media" / "thresholds.json")
 
 
 def test_each_result_names_the_evaluator_that_produced_it(tmp_path) -> None:
