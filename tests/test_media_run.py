@@ -255,5 +255,5 @@ def test_the_command_line_writes_the_same_files(tmp_path, capsys) -> None:
     assert sorted(p.name for p in (tmp_path / "cli").glob("*.json")) == [
         "stock-seed-01.json",
         "stock-seed-02.json",
-        "thresholds.json",
     ]
+    assert (tmp_path / "cli" / "media" / "thresholds.json").is_file()
