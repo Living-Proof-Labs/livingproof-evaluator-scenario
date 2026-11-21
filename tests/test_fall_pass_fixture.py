@@ -2,7 +2,7 @@
 """A real recording of a robot that stays up: the fall step PASSes from a real MCAP (issue 32).
 
 The MCAP, binding and observation are what livingproof-sim-mujoco v3.8.1 wrote for the Unitree G1
-``playground`` configuration walking hallway-open (see the fixture's PROVENANCE.json and
+``playground`` configuration walking the stock scenario world (see the fixture's PROVENANCE.json and
 generate.py.txt). Nothing in them is hand-written. Earlier real-sim fixtures all fall or touch a
 wall, so none showed PASS on the fall step.
 """
