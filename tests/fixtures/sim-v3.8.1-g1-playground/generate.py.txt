@@ -1,12 +1,14 @@
 """How tests/fixtures/sim-v3.8.1-g1-playground was produced: a real sim run, nothing hand-written.
 
-Environment: livingproof-unitree-g1 at 0612df10a3bda9495485786fa5c5a0d4220b6c7b (main; pins
+Environment (what produced the recording): livingproof-unitree-g1 at 0612df10a3bda9495485786fa5c5a0d4220b6c7b (main; pins
 livingproof-sim-mujoco v3.8.1 = 2ed053f77b08c0e7567746b37244f74730ff3cac), `uv sync`, MUJOCO_GL=egl
 (osmesa also works), network access for the robot's pinned upstream files.
 
 Inputs placed inside that checkout, as a verification lock names them:
   caller.lock.json  the lock of livingproof-verification's unitree-g1-playground-mujoco-hallway
                     definition (livingproof-verification verifications/, lock format 0.2.0)
+                    NOTE: that lock's nominal pins (G1 v2.3.12, sim v3.6.2) did not produce the
+                    recording; the checkout above and sim v3.8.1 did.
   specs/scenarios/walk-hallway/parameters.json  robot-capability-specs v2.3.0, sha256
                     9226aa6bc0e577863bdc210514e7e7c3a7edc32f49c4f7b46aa7249837f08b3d
   worlds/hallway-open/0.1.0/world.json  livingproof-worlds hallway-open 0.1.0, sha256
