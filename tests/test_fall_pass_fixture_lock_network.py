@@ -125,3 +125,26 @@ def test_the_recorded_lock_sha256_matches_the_lock_at_that_commit():
         f"sha256 of {url} (commit {lock['commit']}) is {actual}, "
         f"but PROVENANCE.json records {lock['sha256']}"
     )
+
+
+def test_a_hash_mismatch_names_the_url_and_commit_and_is_not_retried(monkeypatch):
+    """Vera, PR 47: the fetch is the only retried step; a wrong body fails on the first fetch and
+    the message names the URL, the commit and both hashes. Calls the network test body directly
+    (marks apply at collection only) with the fetch replaced, so it runs offline."""
+    import sys
+
+    module = sys.modules[__name__]
+    calls = []
+
+    def fake_fetch(url, token):
+        calls.append(url)
+        return b"not the lock"
+
+    monkeypatch.setattr(module, "_fetch", fake_fetch)
+    lock = _lock()
+    with pytest.raises(AssertionError) as caught:
+        test_the_recorded_lock_sha256_matches_the_lock_at_that_commit()
+    message = str(caught.value)
+    assert len(calls) == 1
+    assert calls[0] in message and lock["commit"] in message
+    assert lock["sha256"] in message and hashlib.sha256(b"not the lock").hexdigest() in message
