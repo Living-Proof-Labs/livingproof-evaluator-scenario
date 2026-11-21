@@ -27,7 +27,15 @@ USES = re.compile(
 )
 PRESET = re.compile(rf"^github>{REPO}:renovate-preset#(?P<ref>.+)$")
 SHARED_RELEASE_INPUTS = {"dry-run", "draft-release"}
-SHARED_RELEASE_OUTPUTS = {"draft-created", "published", "version", "git-tag", "release-url"}
+# v9.8.0 added `commit`; the v9.7.9 -> v9.8.1 bump (#43) skipped over it without updating this.
+SHARED_RELEASE_OUTPUTS = {
+    "draft-created",
+    "published",
+    "version",
+    "git-tag",
+    "commit",
+    "release-url",
+}
 
 
 def _root() -> Path:
@@ -174,3 +182,12 @@ def test_recorded_interface_matches_the_pinned_shared_workflow():
         shared = response.read().decode()
     assert _workflow_call_keys(shared, "inputs") == SHARED_RELEASE_INPUTS
     assert _workflow_call_keys(shared, "outputs") == SHARED_RELEASE_OUTPUTS
+
+
+def test_ci_runs_the_network_checks():
+    """Drift in the recorded interface was invisible because CI never set LIVINGPROOF_NETWORK (#46):
+    the verify job's test step must opt in, with a token so the GitHub fetches are not anonymous."""
+    text = (ROOT / ".github" / "workflows" / "verify.yml").read_text()
+    block = _job_block(text, "verify")
+    assert re.search(r'^\s+LIVINGPROOF_NETWORK:\s*"?1"?\s*$', block, re.MULTILINE)
+    assert re.search(r"^\s+GITHUB_TOKEN:\s*\$\{\{\s*github\.token\s*\}\}", block, re.MULTILINE)
