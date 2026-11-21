@@ -1,0 +1,26 @@
+"""How tests/fixtures/sim-v3.8.1-g1-playground was produced: a real sim run, nothing hand-written.
+
+Environment: livingproof-unitree-g1 at 0612df10a3bda9495485786fa5c5a0d4220b6c7b (main; pins
+livingproof-sim-mujoco v3.8.1 = 2ed053f77b08c0e7567746b37244f74730ff3cac), `uv sync`, MUJOCO_GL=egl
+(osmesa also works), network access for the robot's pinned upstream files.
+
+Inputs placed inside that checkout, as a verification lock names them:
+  caller.lock.json  the lock of livingproof-verification's unitree-g1-playground-mujoco-hallway
+                    definition (livingproof-verification verifications/, lock format 0.2.0)
+  specs/scenarios/walk-hallway/parameters.json  robot-capability-specs v2.3.0, sha256
+                    9226aa6bc0e577863bdc210514e7e7c3a7edc32f49c4f7b46aa7249837f08b3d
+  worlds/hallway-open/0.1.0/world.json  livingproof-worlds hallway-open 0.1.0, sha256
+                    d60bb8aa6a72c8403fb6674cc9d803962c1484bc3e163527988e8c57ccec775c
+                    (the same bytes as tests/fixtures/sim-1e020b2/world.json)
+
+Commands, run from the checkout (one trial, command_speed 0.5 forward, no seed, no noise):
+  python -m livingproof_sim_mujoco.evidence lpl_g1.adapter:ROBOT playground OUT/ev \
+      --lock caller.lock.json --trials 1
+  echo '{"trials": []}' > verification.json      # no PASS/FAIL pick, so no video
+  python -m livingproof_sim_mujoco.media lpl_g1.adapter:ROBOT playground OUT/ev \
+      verification.json OUT/media --lock caller.lock.json
+
+Copied unchanged: OUT/media/mcap/trial-01.mcap, OUT/media/mcap/trial-01.binding.json and
+OUT/ev/trials/trial-01.json (as observation-trial-01.json). media() refuses to keep a recording
+unless its re-run observation hashes to the evidence's, so the MCAP is of the graded trial.
+"""
