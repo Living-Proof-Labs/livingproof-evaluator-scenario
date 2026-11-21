@@ -7,6 +7,9 @@ livingproof-sim-mujoco v3.8.1 = 2ed053f77b08c0e7567746b37244f74730ff3cac), `uv s
 Inputs placed inside that checkout, as a verification lock names them:
   caller.lock.json  the lock of livingproof-verification's unitree-g1-playground-mujoco-hallway
                     definition (livingproof-verification verifications/, lock format 0.2.0)
+                    Pinned: livingproof-verification 4e23501bb3c7539406ead420e76721d52a444caf,
+                    verifications/unitree-g1-playground-mujoco-hallway.lock.json, sha256
+                    5d96e0ee842e74270aac06af51d6780898bb51e6bc30cfea9e8cd414e693dc19.
                     NOTE: that lock's nominal pins (G1 v2.3.12, sim v3.6.2) did not produce the
                     recording; the checkout above and sim v3.8.1 did.
   specs/scenarios/walk-hallway/parameters.json  robot-capability-specs v2.3.0, sha256
@@ -14,6 +17,9 @@ Inputs placed inside that checkout, as a verification lock names them:
   worlds/hallway-open/0.1.0/world.json  livingproof-worlds hallway-open 0.1.0, sha256
                     d60bb8aa6a72c8403fb6674cc9d803962c1484bc3e163527988e8c57ccec775c
                     (the same bytes as tests/fixtures/sim-1e020b2/world.json)
+
+Clone the robot with its URL as https://github.com/Living-Proof-Labs/livingproof-unitree-g1 (without .git):
+the binding's nominal.ref records the clone's remote URL, so a .git suffix changes the binding's bytes.
 
 Commands, run from the checkout (one trial, command_speed 0.5 forward, no seed, no noise):
   python -m livingproof_sim_mujoco.evidence lpl_g1.adapter:ROBOT playground OUT/ev \

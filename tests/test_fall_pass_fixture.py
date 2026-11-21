@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import re
 
 from mcap.reader import make_reader
 
@@ -22,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "tests" / "fixtures" / "sim-v3.8.1-g1-playground"
 WORLD = json.loads((ROOT / "tests/fixtures/sim-1e020b2/world.json").read_text())
 # The limits capability-verifier graded this robot's run against (livingproof-verification
-# run 43402628666, tests/fixtures/lpv-run-43402628666/g1-playground-result-01.json).
+# run 43402628666, tests/fixtures/lpv-run-43402628666/g1-playground-verification.json).
 THRESHOLDS = {"time_limit": 27.0, "lateral_limit": 0.49, "half_width": 0.75, "fall_height": 0.5}
 BY_RULE = {c["fail_when"]: c["evaluator"] for c in parameters_document()["checks"]}
 FALL = BY_RULE["less-than-limit"]
@@ -48,6 +49,10 @@ def test_the_fixture_is_the_recording_the_sim_wrote():
     assert generator["runner"]["tag"] == "v3.8.1" and generator["command"]
     for name, digest in provenance["sha256"].items():
         assert _sha(FIX / name) == digest, name
+    # The map covers every fixture file except PROVENANCE.json, which cannot hold its own hash.
+    files = {p.name for p in FIX.iterdir()} - {"PROVENANCE.json"}
+    assert set(provenance["sha256"]) == files
+    assert "PROVENANCE.json" in provenance["sha256_note"]
     assert provenance["world"]["sha256"] == _sha(ROOT / "tests/fixtures/sim-1e020b2/world.json")
 
 
@@ -109,3 +114,38 @@ def test_only_the_fall_step_flips_when_its_limit_is_raised_above_the_real_height
     verdicts = _verdicts(_run(fall_height=0.8))
     assert verdicts[FALL] == "FAIL"
     assert {v for k, v in verdicts.items() if k != FALL} == {"PASS"}
+
+
+def test_the_limits_source_names_the_files_that_hold_the_limits():
+    provenance = json.loads((FIX / "PROVENANCE.json").read_text())
+    files = provenance["limits_files"]
+    assert "43402628666" in provenance["limits_source"] and files["run"] == 43402628666
+    for name in ("g1-playground-verification.json", "run-manifest.json"):
+        assert name in provenance["limits_source"]
+    stored = ROOT / files["stored_file"]
+    assert stored.name == "g1-playground-verification.json" and stored.is_file()
+    assert json.loads(stored.read_text())["thresholds"] == THRESHOLDS
+    # run-manifest.json is in the run's evidence artifact, not stored here; it is named, not read.
+    assert files["artifact_file"].startswith("run-manifest.json")
+
+
+def test_the_lock_that_drove_the_run_is_pinned_by_commit_and_sha256():
+    lock = json.loads((FIX / "PROVENANCE.json").read_text())["generator"]["lock_nominal_pins"][
+        "lock"
+    ]
+    assert lock["repository"] == "Living-Proof-Labs/livingproof-verification"
+    assert re.fullmatch(r"[0-9a-f]{40}", lock["commit"])
+    assert re.fullmatch(r"[0-9a-f]{64}", lock["sha256"])
+    assert lock["path"].endswith(".lock.json") and "unitree-g1-playground" in lock["path"]
+    text = (FIX / "generate.py.txt").read_text()
+    assert lock["commit"] in text and lock["sha256"] in text
+
+
+def test_the_regeneration_notes_say_to_clone_without_dot_git():
+    """The binding's nominal ref carries the remote URL, so a .git suffix changes its bytes."""
+    text = " ".join((FIX / "generate.py.txt").read_text().split())
+    assert "without .git" in text
+    ref = json.loads((FIX / "trial-01.binding.json").read_text())["observables"]["base_height"][
+        "nominal"
+    ]["ref"]
+    assert ".git@" not in ref and ref.startswith("https://github.com/")

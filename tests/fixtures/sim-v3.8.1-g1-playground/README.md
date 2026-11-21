@@ -12,7 +12,7 @@ A real recording of a standing-and-walking G1 trial that passes the fall step
   `evidence` then `media` modules. Commands: `generate.py.txt`.
 - **Limit set** (time 27.0 s, lateral 0.49 m, half width 0.75 m, fall 0.50 m): taken from
   livingproof-verification run 43402628666 (`tests/fixtures/lpv-run-43402628666/
-  g1-playground-result-01.json`). That run's observation is byte-identical to this one's.
+  g1-playground-verification.json`, and the artifact's `run-manifest.json`). That run's observation is byte-identical to this one's.
 
 ## What did not produce it
 
