@@ -27,7 +27,15 @@ USES = re.compile(
 )
 PRESET = re.compile(rf"^github>{REPO}:renovate-preset#(?P<ref>.+)$")
 SHARED_RELEASE_INPUTS = {"dry-run", "draft-release"}
-SHARED_RELEASE_OUTPUTS = {"draft-created", "published", "version", "git-tag", "release-url"}
+# v9.8.0 added `commit`; the v9.7.9 -> v9.8.1 bump (#43) skipped over it without updating this.
+SHARED_RELEASE_OUTPUTS = {
+    "draft-created",
+    "published",
+    "version",
+    "git-tag",
+    "commit",
+    "release-url",
+}
 
 
 def _root() -> Path:

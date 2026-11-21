@@ -49,6 +49,11 @@ jobs:
           version: "3.54.0"
       - run: task setup
       - run: task verify
+        env:
+          # Opt in to the network-gated tests (the guidelines interface, the docs brand lock and
+          # the fixture lock hash), so drift fails the job that bumped it (#46).
+          LIVINGPROOF_NETWORK: "1"
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Publish test results
         id: report
         if: ${{ !cancelled() }}
@@ -90,7 +95,7 @@ jobs:
           tar -xzf "$RUNNER_TEMP/$ACTIONLINT_ARCHIVE" -C "$RUNNER_TEMP" actionlint
           "$RUNNER_TEMP/actionlint" -color
   release:
-    # semantic-release.yml@v3.0.0 analyzes conventional commits, then tags
+    # semantic-release.yml (pinned below) analyzes conventional commits, then tags
     # v${version} and publishes a GitHub release. It does not write a version
     # into pyproject.toml. hatch-vcs reads that v* tag when the package is built.
     needs: verify
