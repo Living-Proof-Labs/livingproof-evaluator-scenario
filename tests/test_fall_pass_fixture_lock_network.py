@@ -12,14 +12,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import io
 import os
-import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 import pytest
+from github_fetch import fetch as _fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 PROVENANCE = ROOT / "tests" / "fixtures" / "sim-v3.8.1-g1-playground" / "PROVENANCE.json"
@@ -35,84 +32,6 @@ def test_the_recorded_lock_names_the_commit_and_a_sha256():
     assert lock["repository"] == "Living-Proof-Labs/livingproof-verification"
     assert lock["commit"] == COMMIT
     assert len(lock["sha256"]) == 64 and lock["path"].endswith(".lock.json")
-
-
-RETRY_STATUS = (403, 429)
-
-
-def _fetch(url: str, token: str | None, opener=urllib.request.urlopen, pause=time.sleep) -> bytes:
-    """GET ``url``; retry once on a transient network error or HTTP 403/429, else raise.
-
-    Only the fetch is retried. A sha256 mismatch is checked afterwards and is never retried.
-    """
-    request = urllib.request.Request(
-        url, headers={"Authorization": f"Bearer {token}"} if token else {}
-    )
-    for attempt in (1, 2):
-        try:
-            with opener(request, timeout=30) as response:
-                return response.read()
-        except urllib.error.HTTPError as error:
-            if error.code not in RETRY_STATUS or attempt == 2:
-                raise
-        except (urllib.error.URLError, TimeoutError, ConnectionError):
-            if attempt == 2:
-                raise
-        pause(2)
-    raise AssertionError("unreachable")
-
-
-class _Reply:
-    def __init__(self, body: bytes):
-        self.body = body
-
-    def __enter__(self):
-        return io.BytesIO(self.body)
-
-    def __exit__(self, *exc):
-        return False
-
-
-def _script(*steps):
-    """An opener that plays ``steps`` in turn: an exception is raised, bytes are returned."""
-    calls = []
-
-    def opener(request, timeout):
-        calls.append(request)
-        step = steps[len(calls) - 1]
-        if isinstance(step, BaseException):
-            raise step
-        return _Reply(step)
-
-    return opener, calls
-
-
-def _http(code):
-    return urllib.error.HTTPError("https://example.invalid", code, "x", {}, None)
-
-
-@pytest.mark.parametrize(
-    "first", [_http(403), _http(429), urllib.error.URLError("reset"), TimeoutError()]
-)
-def test_a_transient_failure_is_retried_once(first):
-    opener, calls = _script(first, b"ok")
-    assert _fetch("https://example.invalid", None, opener, lambda _: None) == b"ok"
-    assert len(calls) == 2
-
-
-def test_a_second_failure_is_raised_not_retried_again():
-    opener, calls = _script(_http(429), _http(429), b"never")
-    with pytest.raises(urllib.error.HTTPError):
-        _fetch("https://example.invalid", None, opener, lambda _: None)
-    assert len(calls) == 2
-
-
-@pytest.mark.parametrize("code", [404, 500])
-def test_other_http_errors_are_not_retried(code):
-    opener, calls = _script(_http(code), b"never")
-    with pytest.raises(urllib.error.HTTPError):
-        _fetch("https://example.invalid", None, opener, lambda _: None)
-    assert len(calls) == 1
 
 
 @pytest.mark.skipif(not os.environ.get("LIVINGPROOF_NETWORK"), reason="set LIVINGPROOF_NETWORK=1")
