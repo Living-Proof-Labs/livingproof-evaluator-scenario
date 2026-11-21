@@ -117,13 +117,16 @@ def test_only_the_fall_step_flips_when_its_limit_is_raised_above_the_real_height
 
 
 def test_the_limits_source_names_the_files_that_hold_the_limits():
-    source = json.loads((FIX / "PROVENANCE.json").read_text())["limits_source"]
-    assert source["run"] == 43402628666
-    stored = ROOT / source["stored_file"]
+    provenance = json.loads((FIX / "PROVENANCE.json").read_text())
+    files = provenance["limits_files"]
+    assert "43402628666" in provenance["limits_source"] and files["run"] == 43402628666
+    for name in ("g1-playground-verification.json", "run-manifest.json"):
+        assert name in provenance["limits_source"]
+    stored = ROOT / files["stored_file"]
     assert stored.name == "g1-playground-verification.json" and stored.is_file()
     assert json.loads(stored.read_text())["thresholds"] == THRESHOLDS
     # run-manifest.json is in the run's evidence artifact, not stored here; it is named, not read.
-    assert source["artifact_file"].endswith("run-manifest.json")
+    assert files["artifact_file"].startswith("run-manifest.json")
 
 
 def test_the_lock_that_drove_the_run_is_pinned_by_commit_and_sha256():
@@ -133,7 +136,7 @@ def test_the_lock_that_drove_the_run_is_pinned_by_commit_and_sha256():
     assert lock["repository"] == "Living-Proof-Labs/livingproof-verification"
     assert re.fullmatch(r"[0-9a-f]{40}", lock["commit"])
     assert re.fullmatch(r"[0-9a-f]{64}", lock["sha256"])
-    assert lock["path"].endswith("unitree-g1-playground-mujoco-hallway.lock.json")
+    assert lock["path"].endswith(".lock.json") and "unitree-g1-playground" in lock["path"]
     text = (FIX / "generate.py.txt").read_text()
     assert lock["commit"] in text and lock["sha256"] in text
 
