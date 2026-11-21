@@ -44,12 +44,38 @@ def _verdicts(payload):
 
 def test_the_fixture_is_the_recording_the_sim_wrote():
     provenance = json.loads((FIX / "PROVENANCE.json").read_text())
-    assert "v3.8.1" in provenance["generator"]["runner"]
-    for key in ("runner", "robot", "command"):
-        assert provenance["generator"][key]
+    generator = provenance["generator"]
+    assert generator["runner"]["tag"] == "v3.8.1" and generator["command"]
     for name, digest in provenance["sha256"].items():
         assert _sha(FIX / name) == digest, name
     assert provenance["world"]["sha256"] == _sha(ROOT / "tests/fixtures/sim-1e020b2/world.json")
+
+
+def test_the_provenance_names_what_actually_ran_and_the_binding_agrees():
+    """The robot ref is the commit that produced the recording, not the lock's nominal pin."""
+    provenance = json.loads((FIX / "PROVENANCE.json").read_text())
+    robot, runner_pin = provenance["generator"]["robot"], provenance["generator"]["runner"]
+    assert (robot["ref"], robot["commit"][:7]) == ("main", "0612df1")
+    assert (runner_pin["tag"], runner_pin["commit"][:7]) == ("v3.8.1", "2ed053f")
+    binding = json.loads((FIX / "trial-01.binding.json").read_text())
+    nominal = binding["observables"]["base_height"]["nominal"]["ref"]
+    assert f"{robot['repository'].split('/')[-1]}@{robot['commit']}:" in nominal
+    assert "43402628666" in provenance["limits_source"]
+
+
+def test_the_locks_nominal_pin_is_labelled_as_not_having_produced_the_recording():
+    provenance = json.loads((FIX / "PROVENANCE.json").read_text())
+    nominal = provenance["generator"]["lock_nominal_pins"]
+    assert nominal["robot_ref"] == "v2.3.12" and "did NOT produce" in nominal["note"]
+    assert provenance["generator"]["robot"]["commit"] != nominal["robot_commit"]
+    readme = " ".join((FIX / "README.md").read_text().split())
+    assert "0612df1" in readme and "2ed053f" in readme and "43402628666" in readme
+    for token in ("v2.3.12", "v3.6.2"):
+        assert token in readme and token in (FIX / "generate.py.txt").read_text()
+    assert "nominal pins only" in readme and "did not produce this recording" in readme
+    assert provenance["generator"]["robot"]["commit"][:7] in readme
+    for text in (readme, (FIX / "generate.py.txt").read_text()):
+        assert "nominal" in text
 
 
 def test_the_observation_hash_is_the_one_verification_graded():
