@@ -2,9 +2,21 @@
 name: Docs
 on:
   pull_request:
-  push:
-    branches: [main]
+  workflow_call:
+    inputs:
+      release_tag:
+        required: true
+        type: string
+      release_version:
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag (vX.Y.Z) to build and deploy
+        required: false
+        type: string
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -15,12 +27,24 @@ jobs:
     # No published development image yet; same hosted fallback as Verify.
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag }}
+      RELEASE_VERSION: ${{ inputs.release_version }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-tags: true
+          ref: ${{ inputs.release_tag || github.event.pull_request.head.sha || github.sha }}
+      - name: Require release tag to match the exact verified commit
+        if: inputs.release_tag != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse "${RELEASE_TAG}^{commit}")" = "$GITHUB_SHA"
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           python-version: '3.12'
@@ -38,12 +62,12 @@ jobs:
           retention-days: 14
           if-no-files-found: error
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && inputs.release_tag != ''
         with:
           path: artifacts/site
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && inputs.release_tag != ''
     runs-on: ubuntu-24.04
     permissions:
       contents: read
