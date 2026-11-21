@@ -1,0 +1,38 @@
+{
+  "generator": {
+    "runner": {
+      "repository": "Living-Proof-Labs/livingproof-sim-mujoco",
+      "tag": "v3.8.1",
+      "commit": "2ed053f77b08c0e7567746b37244f74730ff3cac",
+      "modules": "livingproof_sim_mujoco.evidence then livingproof_sim_mujoco.media (livingproof-hallway-media/2.1.0)"
+    },
+    "robot": {
+      "repository": "Living-Proof-Labs/livingproof-unitree-g1",
+      "ref": "main",
+      "commit": "0612df10a3bda9495485786fa5c5a0d4220b6c7b",
+      "configuration": "playground",
+      "adapter": "lpl_g1.adapter:ROBOT"
+    },
+    "command": "constant forward command_speed 0.5 m/s, 1 trial; commands in generate.py.txt",
+    "lock_nominal_pins": {
+      "note": "The lock that drove the run names these pins. They did NOT produce the recording; the robot and runner above did.",
+      "robot_ref": "v2.3.12",
+      "robot_commit": "cdab1cfe50351bc8611cab5dbb6d1a1b23cc179f",
+      "runner_tag": "v3.6.2"
+    }
+  },
+  "note": "A real G1 trial: the robot stays up (min base height 0.71 m, fall limit 0.50 m), crosses the exit at 9.60 s and never touches a wall. Its observation is byte-identical to the one in livingproof-verification run 43402628666 (tests/fixtures/lpv-run-43402628666 g1-playground-trial-01.json), re-recorded here with the media recorder. Fixture limits (time 27.0 s, lateral 0.49 m, half width 0.75 m, fall 0.50 m) are that run's, from g1-playground-result-01.json.",
+  "world": {
+    "file": "tests/fixtures/sim-1e020b2/world.json (not copied)",
+    "sha256": "d60bb8aa6a72c8403fb6674cc9d803962c1484bc3e163527988e8c57ccec775c"
+  },
+  "observation_sha256": "48b6078f3deb763cd1595d727bff52baac95b335de96e57db1402ee6ece9840b",
+  "sha256": {
+    "generate.py.txt": "24b4bfecd88b356a12eccd6bac054e463b9eabc49a6741a54e15b2b3fb52f533",
+    "observation-trial-01.json": "48b6078f3deb763cd1595d727bff52baac95b335de96e57db1402ee6ece9840b",
+    "trial-01.binding.json": "1e0786499919da8626b52b88c099adf0418e8c204df0c77a125c00d710cbb681",
+    "trial-01.mcap": "f5a6d37d26586cb1416e5ca2fb19d1cf448d00cf239d0892104f2835eaef9a34",
+    "README.md": "73a790946cea1bc2c0929da25f8ff6b51ff338bcbbf9931668072dab6f07eab9"
+  },
+  "limits_source": "livingproof-verification run 43402628666, tests/fixtures/lpv-run-43402628666/g1-playground-result-01.json"
+}
