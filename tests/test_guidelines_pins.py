@@ -13,10 +13,10 @@ from __future__ import annotations
 import json
 import os
 import re
-import urllib.request
 from pathlib import Path
 
 import pytest
+from github_fetch import fetch
 
 REPO = "Living-Proof-Labs/collaboration-guidelines"
 TAG = r"v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)"
@@ -178,8 +178,7 @@ def test_recorded_interface_matches_the_pinned_shared_workflow():
     refs = {match.group("ref") for match in guideline_calls().values()}
     (ref,) = refs
     url = f"https://raw.githubusercontent.com/{REPO}/{ref}/.github/workflows/semantic-release.yml"
-    with urllib.request.urlopen(url, timeout=30) as response:
-        shared = response.read().decode()
+    shared = fetch(url).decode()
     assert _workflow_call_keys(shared, "inputs") == SHARED_RELEASE_INPUTS
     assert _workflow_call_keys(shared, "outputs") == SHARED_RELEASE_OUTPUTS
 
