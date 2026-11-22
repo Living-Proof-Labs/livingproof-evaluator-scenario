@@ -86,6 +86,53 @@ class DeliveryGuardsTest(unittest.TestCase):
         )
         self.assertEqual(self.deploy["concurrency"]["cancel-in-progress"], "false")
         self.assertTrue(self.deploy["steps"][-1]["uses"].startswith("actions/deploy-pages@"))
+        self.assertEqual(
+            self.deploy["steps"][-2]["name"], "Require current main inside deployment lock"
+        )
+
+    def test_runtime_pages_lookup_is_attempt_bound_and_checks_both_downloads(self):
+        readers = {
+            item["name"]: item
+            for item in self.deploy["steps"]
+            if item.get("name", "").startswith(("Read back", "Retry the exact same"))
+        }
+        by_id = readers["Read back the exact Pages upload by ID"]
+        by_name = readers["Read back the exact Pages deployment name"]
+        self.assertEqual(
+            by_id["with"]["artifact-ids"], "${{ steps.pages_upload.outputs.artifact-id }}"
+        )
+        self.assertEqual(by_name["with"]["name"], self.deploy["steps"][-1]["with"]["artifact_name"])
+        self.assertTrue(all("github-token" not in item["with"] for item in readers.values()))
+        for suffix, step_id, key, reader in (
+            ("upload by ID", "pages_by_id", "artifact-ids", by_id),
+            ("deployment name", "pages_by_name", "name", by_name),
+        ):
+            retry = next(
+                item
+                for name, item in readers.items()
+                if name.endswith(" " + suffix) and name.startswith("Retry ")
+            )
+            self.assertEqual(retry["if"], f"steps.{step_id}.outcome == 'failure'")
+            self.assertEqual(retry["with"][key], reader["with"][key])
+            self.assertNotIn("continue-on-error", retry)
+
+        check = step(self.deploy, "Require both Pages artifact lookups to match the sealed bytes")
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            payload = b"sealed original Pages archive"
+            (root / "artifact.tar").write_bytes(payload)
+            for path in ("pages-id", "pages-name", "pages-id-retry", "pages-name-retry"):
+                (root / path).mkdir()
+                (root / path / "artifact.tar").write_bytes(payload)
+            for outcome in ("success", "failure"):
+                with self.subTest(outcome=outcome):
+                    result = run(
+                        check, work, RUNNER_TEMP=work, ID_RESULT=outcome, NAME_RESULT=outcome
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+            (root / "pages-name-retry" / "artifact.tar").write_bytes(b"different archive")
+            result = run(check, work, RUNNER_TEMP=work, ID_RESULT="success", NAME_RESULT="failure")
+            self.assertNotEqual(result.returncode, 0)
 
     def test_current_main_fails_closed(self):
         guard = step(self.deploy, "Require current main inside deployment lock")

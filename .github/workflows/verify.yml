@@ -104,7 +104,7 @@ jobs:
   version:
     permissions:
       contents: read
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.1
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release-candidate.yml@v9.9.2
     with:
       replay-tag: ${{ inputs.release_tag || '' }}
   manual:
@@ -136,7 +136,7 @@ jobs:
       needs.manual.outputs.artifact-id != ''
     permissions:
       contents: write
-    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.1
+    uses: Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.9.2
     with:
       expected-version: ${{ needs.manual.outputs.artifact-version }}
       expected-commit: ${{ needs.manual.outputs.artifact-commit }}
@@ -173,14 +173,6 @@ jobs:
       DIGEST: ${{ needs.manual.outputs.artifact-digest }}
       RELEASE_TAG: ${{ needs.release.outputs.git-tag || inputs.release_tag }}
     steps:
-      - name: Require current main inside deployment lock
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          current=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
-          [[ "$current" =~ ^[0-9a-f]{40}$ ]]
-          test "$current" = "$CANDIDATE"
       - name: Independently require the published stable release at the exact commit
         env:
           GH_TOKEN: ${{ github.token }}
@@ -237,11 +229,75 @@ jobs:
             ' build.json >/dev/null
           tar --dereference --hard-dereference -cf "$RUNNER_TEMP/artifact.tar" .
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        id: pages_upload
         with:
           name: github-pages-${{ github.run_attempt }}
           path: ${{ runner.temp }}/artifact.tar
           retention-days: 1
           if-no-files-found: error
+      - name: Require the final Pages upload ID
+        shell: bash
+        env:
+          ARTIFACT_ID: ${{ steps.pages_upload.outputs.artifact-id }}
+        run: '[[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]'
+      # Use the pinned Actions runtime artifact service (no repository API token).
+      # Wait for this exact upload to be readable by ID and by the name deploy-pages uses.
+      - name: Read back the exact Pages upload by ID
+        id: pages_by_id
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ steps.pages_upload.outputs.artifact-id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/pages-id
+      - name: Briefly wait for the same-run artifact by ID
+        if: steps.pages_by_id.outcome == 'failure'
+        run: sleep 5
+      - name: Retry the exact same Pages upload by ID
+        if: steps.pages_by_id.outcome == 'failure'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ steps.pages_upload.outputs.artifact-id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/pages-id-retry
+      - name: Read back the exact Pages deployment name
+        id: pages_by_name
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: github-pages-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/pages-name
+      - name: Briefly wait for the same-run Pages name
+        if: steps.pages_by_name.outcome == 'failure'
+        run: sleep 5
+      - name: Retry the exact same Pages deployment name
+        if: steps.pages_by_name.outcome == 'failure'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: github-pages-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/pages-name-retry
+      - name: Require both Pages artifact lookups to match the sealed bytes
+        shell: bash
+        env:
+          ID_RESULT: ${{ steps.pages_by_id.outcome }}
+          NAME_RESULT: ${{ steps.pages_by_name.outcome }}
+        run: |
+          set -euo pipefail
+          id_path=pages-id
+          name_path=pages-name
+          if [ "$ID_RESULT" = failure ]; then id_path=pages-id-retry; fi
+          if [ "$NAME_RESULT" = failure ]; then name_path=pages-name-retry; fi
+          digest=$(sha256sum "$RUNNER_TEMP/artifact.tar" | cut -d' ' -f1)
+          printf '%s  %s\n' "$digest" "$RUNNER_TEMP/$id_path/artifact.tar" \
+            "$digest" "$RUNNER_TEMP/$name_path/artifact.tar" | sha256sum --check
+      - name: Require current main inside deployment lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          [[ "$current" =~ ^[0-9a-f]{40}$ ]]
+          test "$current" = "$CANDIDATE"
       - name: Deploy verified manual
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
