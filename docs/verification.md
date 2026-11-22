@@ -33,10 +33,19 @@ These checks do not establish external link availability or live site usability.
 
 ## Publication
 
-The Docs workflow builds pull requests with read-only permissions and retains the
-site for 14 days. A separate deployment job publishes only successful main builds. Immediately before
-publishing, it reads the current main commit from GitHub and rejects a stale
-candidate or failed lookup. Workflow concurrency serializes main deployments.
+The Verify workflow builds pull request manuals with read-only permissions and
+keeps their explicitly prerelease artifacts for 14 days. On main, a read-only
+plan selects the version and revision. The manual is built and checked once,
+then sealed for that workflow attempt before the release writer runs. The
+production site deploys those same bytes only after the stable release exists
+and the tag, commit, version and seal agree. Missing or failed releases, stale
+main and failed lookups do not deploy. Main deployments are serialized.
+
+If a delivery fails after publication, an authorized operator can rerun the
+Verify workflow on main with the existing stable `release_tag`. The retry
+requires the published tag to resolve to the exact current main revision. It
+does not invoke the release writer, create a tag or create another release.
+
 Repository Pages must use GitHub Actions and the `github-pages` environment must
 allow main. Setting or changing these controls requires the owner's action-time
 authorization. This change does not enable Pages or change security settings.

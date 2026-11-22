@@ -4,6 +4,8 @@
 import hashlib
 import inspect
 import json
+import os
+import re
 import shutil
 import subprocess
 import sys
@@ -31,14 +33,42 @@ if hashlib.sha256(brand).hexdigest() != lock["sha256"]:
 (root / "assets/brand.css").write_bytes(brand)
 sha = output("git", "rev-parse", "HEAD")
 source = f"https://github.com/Living-Proof-Labs/livingproof-evaluator-scenario/tree/{sha}"
-identity = {"source_commit": sha, "package_version": result.package_version(), "brand": lock}
+version = os.environ.get("MANUAL_VERSION", "development")
+run_id = os.environ.get("MANUAL_RUN_ID", "")
+run_attempt = os.environ.get("MANUAL_RUN_ATTEMPT", "")
+dirty = bool(output("git", "status", "--porcelain"))
+if run_id or run_attempt or version != "development":
+    number = r"(?:0|[1-9][0-9]*)"
+    # The resolver emits stable X.Y.Z, X.Y.Z-pr.PR.RUN.ATTEMPT, or
+    # X.Y.Z-main.RUN.ATTEMPT when main has no pending release.
+    version_pattern = (
+        rf"{number}\.{number}\.{number}(?:-(?:pr\.[1-9][0-9]*\.|main\.)"
+        r"[1-9][0-9]*\.[1-9][0-9]*)?"
+    )
+    if not re.fullmatch(version_pattern, version):
+        raise ValueError("Invalid planned documentation version")
+    if dirty or os.environ.get("SOURCE_COMMIT") != sha:
+        raise ValueError("Planned documentation requires the exact clean source checkout")
+    if not all(re.fullmatch(r"[1-9][0-9]*", value) for value in (run_id, run_attempt)):
+        raise ValueError("Planned documentation requires the current CI run and attempt")
+package_version = result.package_version()
+identity = {
+    "source_commit": sha,
+    "source_dirty": dirty,
+    "version": version,
+    "run_id": run_id,
+    "run_attempt": run_attempt,
+    "package_version": package_version,
+    "brand": lock,
+}
 (root / "build.json").write_text(json.dumps(identity, indent=2) + "\n")
 (root / "version.md").write_text(
     "# Version and source\n\n"
-    f"Docs: development · [{sha[:12]}]({source})\n\n"
-    f"Full source revision: `{sha}`. Installed package version: `{result.package_version()}`.\n\n"
-    "This manual follows the built checkout, not an independently claimed stable release. "
-    "Only the current manual is maintained; historical releases remain available as "
+    f"Documentation version: **{version}**. [Source revision]({source}).\n\n"
+    f"Builder package metadata: `{package_version}`. For a release, the manual is built from "
+    "the selected commit before tagging. The package still derives its installed release version "
+    "from the tag.\n\n"
+    "Only the current manual is maintained; historical versions remain available as "
     "[source tags](https://github.com/Living-Proof-Labs/livingproof-evaluator-scenario/tags).\n\n"
     "[Machine-readable build identity](build.json). Local uncommitted changes are not "
     "represented by the commit identity; use the CI artifact for review evidence.\n"

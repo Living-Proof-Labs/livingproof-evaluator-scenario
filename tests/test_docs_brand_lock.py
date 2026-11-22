@@ -14,10 +14,10 @@ import hashlib
 import json
 import os
 import re
-import urllib.request
 from pathlib import Path
 
 import pytest
+from github_fetch import fetch
 
 
 def _root() -> Path:
@@ -134,13 +134,4 @@ def test_a_short_tag_is_refused_before_any_request():
 
 @pytest.mark.skipif(not os.environ.get("LIVINGPROOF_NETWORK"), reason="set LIVINGPROOF_NETWORK=1")
 def test_committed_lock_matches_the_real_release():
-    token = os.environ.get("GITHUB_TOKEN")
-
-    def get(url):
-        request = urllib.request.Request(
-            url, headers={"Authorization": f"Bearer {token}"} if token else {}
-        )
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return response.read()
-
-    assert problems(lock(), get) == []
+    assert problems(lock(), fetch) == []
