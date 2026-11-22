@@ -26,7 +26,10 @@ USES = re.compile(
     re.MULTILINE,
 )
 PRESET = re.compile(rf"^github>{REPO}:renovate-preset#(?P<ref>.+)$")
-SHARED_RELEASE_INPUTS = {"dry-run", "draft-release"}
+# v9.9.x added the optional `expected-version` and `expected-commit` (a delivery that is already
+# selected). This repository's call passes neither, and the call test below only needs its own
+# inputs to be a subset.
+SHARED_RELEASE_INPUTS = {"dry-run", "draft-release", "expected-version", "expected-commit"}
 # v9.8.0 added `commit`; the v9.7.9 -> v9.8.1 bump (#43) skipped over it without updating this.
 SHARED_RELEASE_OUTPUTS = {
     "draft-created",

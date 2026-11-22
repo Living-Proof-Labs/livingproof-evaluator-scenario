@@ -115,3 +115,12 @@ def test_each_network_test_fetches_through_the_shared_helper(name):
     text = (TESTS / name).read_text()
     assert "from github_fetch import" in text
     assert "urlopen" not in text
+
+
+@pytest.mark.parametrize("host", ["raw.githubusercontent.com", "api.github.com"])
+def test_the_token_is_sent_to_each_allowed_github_host(host):
+    """Pins the whole allowlist: dropping a host would silently send that host's requests
+    anonymously (found by mutation in the PR 48 review)."""
+    opener, calls = _script(b"ok")
+    _fetch(f"https://{host}/x", opener, token="t0k")
+    assert calls[0].get_header("Authorization") == "Bearer t0k"
