@@ -8,6 +8,14 @@ under `tests/fixtures/livingproof-evaluator-v1.0.0/`, and `PROVENANCE.json`
 there records each file's sha256. A passing test can confirm detection of a
 failed capability; test success and robot capability verdicts are separate.
 
+`task test` also validates `livingproof-evaluator.json` against the
+livingproof-evaluator v1.11.0 implementation schema (commit
+`474dda56311fad6a03715fdba4cd957dc510d459`). Those schema files are byte copies
+under `tests/fixtures/livingproof-evaluator-v1.11.0/`, and `PROVENANCE.json`
+there records each file's sha256. The pin is that tag and commit. A test runs
+the descriptor's trial command on the stored walk-hallway fixture and checks
+the result against the v1.0.0 result schema.
+
 The result schema requires `evaluator.version` to be semantic versioning.
 A commit that is a release tag produces a version such as `1.2.0`, and the
 written document validates. Any other commit produces a hatch-vcs development

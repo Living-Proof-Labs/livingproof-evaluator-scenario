@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """One shared fetch for the network-gated tests: token when available, one retry (#48).
 
-The three LIVINGPROOF_NETWORK tests (guidelines interface, docs brand lock, fixture lock hash) fetch
-through ``tests/github_fetch.py``. It sends GITHUB_TOKEN (CI passes github.token) to GitHub hosts
-only, and retries once on a transient network error or HTTP 403/429. A hash mismatch is checked by
-the caller after the fetch and is never retried.
+The LIVINGPROOF_NETWORK tests (guidelines interface, docs brand lock, fixture lock hash, and the
+livingproof-evaluator v1.11.0 implementation-schema pin) fetch through ``tests/github_fetch.py``.
+It sends GITHUB_TOKEN (CI passes github.token) to GitHub hosts only, and retries once on a
+transient network error or HTTP 403/429. A hash mismatch is checked by the caller after the fetch
+and is never retried.
 """
 
 from __future__ import annotations

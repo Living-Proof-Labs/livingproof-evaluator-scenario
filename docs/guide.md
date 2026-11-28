@@ -90,3 +90,11 @@ writes one result per trial, with `media/thresholds.json`.
   its `uri` is `ID` (a commit or an image digest) and its `sha256` is the digest of this package's
   source.
 - A recording or binding that is not the file `media.json` lists is refused, and nothing is written.
+
+## Implementation descriptor
+
+The repository root file `livingproof-evaluator.json` is the implementation descriptor a loader reads. The declaration is `Living-Proof-Labs/livingproof-evaluator-scenario@<vX.Y.Z>/livingproof-evaluator.json`.
+
+The trial entry is the command under Evaluate the stored fixture: the manifest, `--thresholds`, and `--out`. The descriptor names that output directory `{result_dir}` and the thresholds file `{thresholds}`. It also names the media command above. Optional timestamps stay at their defaults. The trial command sets `--completed-at` from `--started-at`, and the media command has `--started-at` only.
+
+Exit 0 writes results. Exit 1 is a refusal or an uncaught crash. Exit 2, from argparse, is not listed, so it is a failure. The check against livingproof-evaluator v1.11.0 is described in [Verification](verification.md).
