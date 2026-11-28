@@ -24,6 +24,12 @@ The observable vocabulary, binding format and evaluator contract live in [living
 
 The evaluator identifies itself in the report with a one-colour Living Proof Labs mark, kept in [`scenario-evaluator-icon.svg`](src/livingproof_evaluator_scenario/scenario-evaluator-icon.svg). Sizes, rules and rendered previews are in [`design/scenario-evaluator-icon`](design/scenario-evaluator-icon/README.md).
 
+## Implementation descriptor
+
+`livingproof-evaluator.json` at the repository root is this package's implementation descriptor. A loader installs and runs the package from that file. The declaration is `Living-Proof-Labs/livingproof-evaluator-scenario@<vX.Y.Z>/livingproof-evaluator.json`.
+
+It is `livingproof-evaluator-implementation/1`, with `kind` `scenario` and `grading` `robot`, checked against livingproof-evaluator v1.11.0 (commit `474dda56311fad6a03715fdba4cd957dc510d459`). The trial command is the walk-hallway run: the evidence manifest, `--thresholds {thresholds}`, and `--out {result_dir}`. The file also declares `python -m livingproof_evaluator_scenario.media`. Exit 0 writes results. Exit 1 is a refusal or an uncaught crash, and the descriptor maps that code to `refused`. Exit 2 is an argparse usage error. The descriptor does not list it, so exit 2, and any other code it does not list, is a failure.
+
 ## Develop
 
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/). [Task](https://taskfile.dev) 3.54.0 runs the same commands continuous integration runs. This repository has no published development image yet.

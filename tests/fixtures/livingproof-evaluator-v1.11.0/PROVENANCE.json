@@ -1,0 +1,14 @@
+{
+  "repository": "Living-Proof-Labs/livingproof-evaluator",
+  "tag": "v1.11.0",
+  "commit": "474dda56311fad6a03715fdba4cd957dc510d459",
+  "note": "Byte copies of the implementation-descriptor schema. sha256 is of the copied file. Tests validate livingproof-evaluator.json against schema/implementation.schema.json. The pin is this tag and commit.",
+  "files": {
+    "schema/implementation.schema.json": {
+      "sha256": "8398b683102a5fa10bdc786c1f48fda128a89a54e790b735fe6725c5d8ed4994"
+    },
+    "schema/defs.schema.json": {
+      "sha256": "ca61a01f85a63950f5a1794a5d190ce032e382fe9cc54ab53435184cec3a9555"
+    }
+  }
+}

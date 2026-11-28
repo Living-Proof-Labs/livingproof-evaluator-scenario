@@ -13,6 +13,9 @@ It does not grade a run or edit a bundle. Descriptor findings remain empty.
 Already-recorded evidence in the frozen format stays readable. The generic
 Gherkin vocabulary and MCAP runner are not implemented yet.
 
+The implementation descriptor is `livingproof-evaluator.json` at the repository root.
+A loader declares `Living-Proof-Labs/livingproof-evaluator-scenario@<vX.Y.Z>/livingproof-evaluator.json`.
+
 The evaluator contract belongs to
 [livingproof-evaluator](https://github.com/Living-Proof-Labs/livingproof-evaluator),
 capability feature files to
